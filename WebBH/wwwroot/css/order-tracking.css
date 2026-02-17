@@ -1,0 +1,173 @@
+﻿/* Container thanh trạng thái */
+.card-stepper {
+    z-index: 0;
+}
+
+/* Thanh Progress Bar */
+#progressbar-2 {
+    color: #455A64;
+    padding-left: 0px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    counter-reset: step;
+}
+
+    #progressbar-2 li {
+        list-style-type: none;
+        font-size: 13px;
+        width: 25%; /* 4 bước chia đều 25% */
+        float: left;
+        position: relative;
+        font-weight: 500;
+        text-align: center;
+        z-index: 10;
+    }
+
+        /* Vòng tròn Icon (Mặc định xám) */
+        #progressbar-2 li:before {
+            font-family: "bootstrap-icons"; /* Dùng font icon của Bootstrap */
+            content: "\F12F"; /* Icon tròn chấm bi (Circle) */
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            display: block;
+            font-size: 16px;
+            background: #c5cae9; /* Màu nền xám */
+            color: #fff;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            z-index: 10;
+            position: relative; /* Để nằm đè lên đường kẻ */
+        }
+
+        /* Đường kẻ nối giữa các bước */
+        #progressbar-2 li:after {
+            content: '';
+            width: 100%;
+            height: 4px;
+            background-color: #c5cae9;
+            position: absolute;
+            top: 13px; /* Căn chỉnh cho nằm giữa icon */
+            left: -50%;
+            z-index: 0; /* Nằm dưới icon */
+        }
+
+        /* Bỏ đường kẻ ở bước đầu tiên */
+        #progressbar-2 li:first-child:after {
+            content: none;
+        }
+
+        /* --- TRẠNG THÁI ACTIVE (Đã hoàn thành) --- */
+
+        /* Đổi màu icon thành Xanh */
+        #progressbar-2 li.active:before {
+            background: #198754;
+            content: "\F26A"; /* Icon Check (Dấu tích) */
+        }
+
+        /* Đổi màu đường kẻ thành Xanh */
+        #progressbar-2 li.active:after {
+            background: #198754;
+        }
+
+        /* Icon riêng cho từng bước (Tùy chọn cho đẹp hơn) */
+        #progressbar-2 li#step1:before {
+            content: "\F309";
+        }
+        /* Clipboard */
+        #progressbar-2 li#step2:before {
+            content: "\F1B0";
+        }
+        /* Box */
+        #progressbar-2 li#step3:before {
+            content: "\F584";
+        }
+        /* Truck */
+        #progressbar-2 li#step4:before {
+            content: "\F418";
+        }
+/* Star/Check */
+/* File: wwwroot/css/order-tracking.css */
+
+.track-container {
+    margin: 20px 0 40px;
+    position: relative;
+}
+
+.track-line-bg {
+    height: 4px;
+    background-color: #e9ecef;
+    width: 100%;
+    position: absolute;
+    top: 15px;
+    z-index: 1;
+}
+
+.track-line-active {
+    height: 4px;
+    background-color: #198754; /* Màu xanh lá mặc định */
+    position: absolute;
+    top: 15px;
+    left: 0;
+    z-index: 2;
+    transition: width 0.5s ease;
+}
+
+.track-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 3;
+}
+
+.step-item {
+    text-align: center;
+    width: 25%;
+}
+
+.step-icon {
+    width: 34px;
+    height: 34px;
+    background: #e9ecef;
+    color: #6c757d;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 16px;
+    border: 3px solid #fff; /* Viền trắng để tách nền */
+}
+
+.step-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+/* --- TRẠNG THÁI ACTIVE (Đã qua) --- */
+.step-item.active .step-icon {
+    background: #198754;
+    color: #fff;
+}
+
+.step-item.active .step-text {
+    color: #198754;
+}
+
+/* --- TRẠNG THÁI CURRENT (Đang xử lý) --- */
+.step-item.current .step-icon {
+    background: #0d6efd;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.step-item.current .step-text {
+    color: #0d6efd;
+}
+
+/* --- ĐỔI MÀU THANH KHI ĐANG SHIP --- */
+.shipping-mode .track-line-active {
+    background-color: #0d6efd;
+}

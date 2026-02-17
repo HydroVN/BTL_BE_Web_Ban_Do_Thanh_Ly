@@ -1,0 +1,89 @@
+﻿@model WebBH.Models.Register
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng Ký - RE:COLLECT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/auth.css">
+</head>
+<body>
+    <div class="row g-0 auth-wrapper">
+        <div class="col-lg-6 d-none d-lg-flex auth-visual"
+             style="background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop'); background-size: cover; background-position: center;">
+            <div class="visual-content">
+                <div class="brand-line"></div>
+                <h1 class="display-4 fw-bold mb-3" style="font-family: serif;">Gia nhập cộng đồng <br>nhà sưu tập.</h1>
+                <p class="fs-5 text-white-50">Tiếp cận những món đồ thiết kế hiếm có và độc bản.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-6 auth-form-container">
+            <div class="form-wrapper">
+                <div class="auth-logo"><i class="bi bi-square-fill"></i> RE:COLLECT</div>
+                <h2 class="fw-bold mb-2">Tạo Tài Khoản</h2>
+                <p class="text-muted mb-4">Tham gia sàn thương mại đồ thiết kế secondhand uy tín.</p>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger border-0 small mb-4">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                    </div>
+                }
+
+                <form asp-action="Register" method="post">
+                    <div class="custom-input-group">
+                        <label class="custom-input-label">Họ và Tên</label>
+                        <input asp-for="FullName" class="custom-input" placeholder="Nguyễn Văn A" required>
+                    </div>
+
+                    <div class="custom-input-group">
+                        <label class="custom-input-label">Số Điện Thoại</label>
+                        <input asp-for="PhoneNumber" type="tel" class="custom-input" placeholder="09xxxxxxxxx" required>
+                    </div>
+
+                    <div class="custom-input-group">
+                        <label class="custom-input-label">Địa Chỉ Email</label>
+                        <input asp-for="Email" type="email" class="custom-input" placeholder="ten@email.com" required>
+                    </div>
+
+                    <div class="custom-input-group position-relative">
+                        <label class="custom-input-label">Mật Khẩu</label>
+                        <input asp-for="Password" type="password" class="custom-input" id="passwordInput" placeholder="••••••••" required>
+
+                        <div id="password-requirements">
+                            <div class="fw-bold mb-2 small text-dark text-uppercase">Yêu cầu bảo mật:</div>
+                            <div class="requirement-item" id="req-length"><i class="bi bi-x-circle"></i> <span>Tối thiểu 8 ký tự</span></div>
+                            <div class="requirement-item" id="req-lower"><i class="bi bi-x-circle"></i> <span>Ít nhất 1 chữ thường</span></div>
+                            <div class="requirement-item" id="req-upper"><i class="bi bi-x-circle"></i> <span>Ít nhất 1 chữ in hoa</span></div>
+                            <div class="requirement-item" id="req-special"><i class="bi bi-x-circle"></i> <span>Ký tự đặc biệt (!@@#$%^&*)</span></div>
+                        </div>
+                    </div>
+
+                    <div class="custom-input-group position-relative mb-5">
+                        <label class="custom-input-label">Xác Nhận Mật Khẩu</label>
+                        <input asp-for="ConfirmPassword" type="password" class="custom-input" id="confirmPasswordInput" placeholder="Nhập lại mật khẩu" required>
+                        <div id="match-message" class="position-absolute end-0 top-50 translate-middle-y me-2" style="display: none;"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-black w-100 mb-4" id="btnRegister">Đăng Ký Ngay</button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Đã có tài khoản?</span>
+                        <a asp-action="Login" class="text-dark fw-bold text-decoration-none border-bottom border-dark ms-1" style="font-size: 0.9rem;">Đăng nhập</a>
+                    </div>
+                </form>
+
+                <div class="text-center mt-5">
+                    <div class="verified-badge"><i class="bi bi-patch-check-fill text-success"></i> Cộng Đồng Đã Xác Thực</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/js/auth.js"></script>
+</body>
+</html>

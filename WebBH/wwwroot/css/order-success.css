@@ -1,0 +1,129 @@
+﻿/* Container chính */
+.success-container {
+    max-width: 800px;
+    margin: 60px auto;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Icon Checkmark to */
+.success-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background-color: #f0fdf4; /* Xanh nhạt */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+    .success-icon-wrapper i {
+        font-size: 40px;
+        color: #198754; /* Xanh đậm */
+    }
+
+/* Tiêu đề */
+.success-title {
+    font-family: 'Playfair Display', serif; /* Font có chân cho sang trọng */
+    font-size: 3rem;
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.success-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+}
+
+/* Hộp thông tin đơn hàng */
+.order-summary-box {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.order-id-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.order-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* Phần "What to expect next" */
+.next-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    text-align: left;
+    gap: 20px;
+}
+
+.step-item h6 {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.step-item p {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.step-icon {
+    color: #4f46e5; /* Màu xanh tím giống ảnh mẫu */
+    font-size: 1.5rem;
+}
+
+/* Nút bấm */
+.btn-track {
+    background-color: #212529;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+}
+
+    .btn-track:hover {
+        background-color: #000;
+        color: white;
+    }
+
+.btn-continue {
+    background-color: transparent;
+    border: 1px solid #ced4da;
+    color: #212529;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+}
+
+    .btn-continue:hover {
+        background-color: #f8f9fa;
+        border-color: #adb5bd;
+    }

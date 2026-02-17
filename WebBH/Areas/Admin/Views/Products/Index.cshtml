@@ -1,0 +1,163 @@
+﻿@model IEnumerable<WebBH.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold m-0 text-white">Quản lý Sản phẩm</h2>
+    <button type="button" class="btn btn-primary" onclick="openProductModal(0)">
+        <i class="bi bi-plus-lg me-2"></i>Thêm sản phẩm
+    </button>
+</div>
+
+<div class="card shadow-sm border-0 bg-dark text-white">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead class="bg-secondary bg-opacity-25">
+                    <tr>
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Phân loại</th>
+                        <th>Tổng Kho</th>
+                        <th>Giá bán</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <img src="@item.ImageUrl" class="rounded me-3 border border-secondary" style="width: 48px; height: 48px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-bold">@item.Name</div>
+                                        <small class="text-muted">@item.Category?.Name</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (item.ProductVariants != null && item.ProductVariants.Any())
+                                {
+                                    <div style="font-size: 0.85rem;">
+                                        @foreach (var v in item.ProductVariants.Take(2))
+                                        {
+                                            <span class="badge bg-secondary mb-1">@v.Size/@v.Color (@v.Quantity)</span>
+                                        }
+                                        @if (item.ProductVariants.Count > 2)
+                                        {
+                                            <small class="text-muted">...+@(item.ProductVariants.Count - 2)</small>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+
+                                    <span class="text-muted small">--</span>
+                                }
+                            </td>
+                            <td class="text-info fw-bold">
+                                @(item.ProductVariants?.Sum(v => v.Quantity) ?? 0)
+                            </td>
+                            <td class="text-success fw-bold">@item.Price.ToString("N0") đ</td>
+                            <td>
+                                @if (item.IsActive == true)
+                                {
+                                    <span class="badge bg-success">Hiện</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-danger">Ẩn</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-warning me-2" onclick="openProductModal(@item.ProductId)"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(@item.ProductId)"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="modalTitle">Thông tin sản phẩm</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm" enctype="multipart/form-data">
+                    <input type="hidden" id="ProductId" name="ProductId" value="0" />
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label class="form-label text-secondary">Tên sản phẩm</label>
+                            <input type="text" class="form-control bg-black text-white border-secondary" id="Name" name="Name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary">Danh mục</label>
+                            <select class="form-select bg-black text-white border-secondary" id="CategoryId" name="CategoryId" asp-items="ViewBag.Categories" required>
+                                <option value="">-- Chọn --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Giá bán (VNĐ)</label>
+                            <input type="number" class="form-control bg-black text-white border-secondary" id="Price" name="Price" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Ảnh đại diện</label>
+                            <input type="file" class="form-control bg-black text-white border-secondary" id="imageFile" name="imageFile">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-secondary">Mô tả</label>
+                            <textarea class="form-control bg-black text-white border-secondary" id="Description" name="Description" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                <label class="form-check-label" for="IsActive">Hiển thị sản phẩm</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-3">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="text-info m-0"><i class="bi bi-layers me-2"></i>Chi tiết Phân loại (Size/Màu)</h6>
+                        <button type="button" class="btn btn-sm btn-outline-info" onclick="addVariantRow()">
+                            <i class="bi bi-plus-circle me-1"></i>Thêm dòng
+                        </button>
+                    </div>
+
+                    <div class="table-responsive border border-secondary rounded p-2 bg-black bg-opacity-25">
+                        <table class="table table-dark table-sm mb-0">
+                            <thead>
+                                <tr class="text-secondary small">
+                                    <th style="width: 30%">Size</th>
+                                    <th style="width: 30%">Màu sắc</th>
+                                    <th style="width: 30%">Số lượng</th>
+                                    <th style="width: 10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="variantContainer"></tbody>
+                        </table>
+                        <div id="emptyVariantMsg" class="text-center text-muted small py-3">
+                            Chưa có phân loại. Bấm "Thêm dòng" để nhập số lượng.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">Lưu sản phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>

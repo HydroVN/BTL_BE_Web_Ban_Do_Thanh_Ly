@@ -1,0 +1,47 @@
+﻿/* Bảng danh sách User */
+.table-user thead tr {
+    background-color: #1a1d20;
+}
+
+.table-user th {
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    padding: 15px;
+    border-color: #373b3e !important;
+}
+
+.table-user td {
+    padding: 15px;
+    border-color: #373b3e !important;
+}
+
+/* Modal sửa thông tin */
+.modal-content-custom {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    background-color: #1a1d20;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.form-label-custom {
+    color: #adb5bd;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.form-control-dark {
+    background-color: #2b3035 !important;
+    border: 1px solid #495057 !important;
+    color: #fff !important;
+    padding: 10px 15px;
+}
+
+    .form-control-dark:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }

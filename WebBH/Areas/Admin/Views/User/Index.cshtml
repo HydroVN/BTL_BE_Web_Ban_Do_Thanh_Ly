@@ -1,0 +1,116 @@
+﻿@model IEnumerable<WebBH.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/admin-user.css" asp-append-version="true" />
+
+<div class="container-fluid px-4">
+    <h2 class="mt-4 text-white fw-bold">Quản lý Khách hàng</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show bg-dark text-success border-success">
+            <i class="bi bi-check-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show bg-dark text-danger border-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card mb-4 bg-dark border-secondary shadow">
+        <div class="card-header border-secondary text-white fw-bold">
+            <i class="bi bi-people-fill me-1"></i> Danh sách người dùng
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle border-secondary table-user">
+                    <thead>
+                        <tr class="text-muted small">
+                            <th>ID</th>
+                            <th>HỌ TÊN</th>
+                            <th>EMAIL</th>
+                            <th>SỐ ĐIỆN THOẠI</th>
+                            <th class="text-end">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>#@item.UserId</td>
+                                <td class="fw-bold text-info">@item.FullName</td>
+                                <td>@item.Email</td>
+                                <td>@(item.PhoneNumber ?? "---")</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-warning fw-bold text-dark me-1"
+                                            data-bs-toggle="modal" data-bs-target="#editModal"
+                                            data-id="@item.UserId" data-name="@item.FullName"
+                                            data-email="@item.Email" data-phone="@item.PhoneNumber">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </button>
+
+                                    <form asp-action="Delete" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@item.UserId" />
+                                        <button type="submit" class="btn btn-sm btn-danger fw-bold"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng @item.FullName?')">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary modal-content-custom">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-gear me-2"></i>Cập nhật khách hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="m_id" />
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">HỌ VÀ TÊN</label>
+                        <input type="text" name="fullName" id="m_name" class="form-control form-control-dark" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">EMAIL / TÊN ĐĂNG NHẬP</label>
+                        <input type="email" name="email" id="m_email" class="form-control form-control-dark" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">SỐ ĐIỆN THOẠI</label>
+                        <input type="text" name="phone" id="m_phone" class="form-control form-control-dark" />
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-user.js" asp-append-version="true"></script>
+}

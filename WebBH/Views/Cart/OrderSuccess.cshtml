@@ -1,0 +1,105 @@
+﻿@model WebBH.Models.Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+<style>
+    .success-card {
+        max-width: 600px;
+        margin: 50px auto;
+        text-align: center;
+        padding: 40px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        background: #d1e7dd;
+        color: #198754;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin: 0 auto 20px;
+    }
+
+    .order-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 30px 0;
+        text-align: left;
+    }
+
+    .btn-track {
+        background: #212529;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 0;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        transition: 0.3s;
+    }
+
+        .btn-track:hover {
+            background: #000;
+            color: white;
+        }
+</style>
+
+<div class="container">
+    <div class="success-card">
+        <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+
+        <h1 class="fw-bold" style="font-family: 'Playfair Display', serif;">Cảm ơn bạn!</h1>
+        <p class="text-muted">Đơn hàng của bạn đã được tiếp nhận thành công.</p>
+
+        <div class="alert alert-success border-0 d-flex align-items-center gap-3 text-start mt-4" style="background: #f0fdf4; color: #166534;">
+            <i class="bi bi-tree-fill fs-3"></i>
+            <div>
+                <strong>Tác động tích cực:</strong>
+                <div class="small">Việc mua đồ secondhand giúp giảm lượng rác thải thời trang ra môi trường.</div>
+            </div>
+        </div>
+
+        <div class="order-info">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">MÃ ĐƠN HÀNG</span>
+                <span class="fw-bold">#ORD-@Model.OrderId</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">NGÀY ĐẶT</span>
+                <span class="fw-bold">@Model.OrderDate?.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top mt-2">
+                <span class="fw-bold">TỔNG CỘNG</span>
+                <span class="fw-bold text-primary">@Model.TotalAmount?.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3 small text-uppercase">Bước tiếp theo</h5>
+        <div class="row text-start mb-4 g-3">
+            <div class="col-4">
+                <div class="fw-bold small"><i class="bi bi-envelope text-primary"></i> Xác nhận</div>
+                <div class="text-muted" style="font-size: 12px;">Admin sẽ duyệt đơn</div>
+            </div>
+            <div class="col-4">
+                <div class="fw-bold small"><i class="bi bi-box-seam text-primary"></i> Đóng gói</div>
+                <div class="text-muted" style="font-size: 12px;">Chuẩn bị hàng</div>
+            </div>
+            <div class="col-4">
+                <div class="fw-bold small"><i class="bi bi-truck text-primary"></i> Giao hàng</div>
+                <div class="text-muted" style="font-size: 12px;">Giao tận tay bạn</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="/Order/Details/@Model.OrderId" class="btn-track">THEO DÕI ĐƠN HÀNG</a>
+            <a href="/" class="btn btn-outline-dark rounded-0 py-2 px-4 fw-bold">VỀ TRANG CHỦ</a>
+        </div>
+    </div>
+</div>

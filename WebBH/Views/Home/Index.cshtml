@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Trang Chủ";
+}
+<link rel="stylesheet" href="~/css/shop.css">
+
+<div class="container-fluid p-0 mb-5">
+    <div class="row g-0">
+        <div class="col-md-5 bg-dark text-white d-flex align-items-center p-5">
+            <div class="p-lg-4">
+                <span class="badge bg-primary mb-3 px-3 py-2 rounded-pill">BỘ SƯU TẬP MỚI</span>
+                <h1 class="display-3 fw-bold mb-4 text-white" style="font-family: 'Playfair Display', serif;">
+                    Sống Lại Đam Mê,<br> Chuẩn Gu Thượng Lưu.
+                </h1>
+                <p class="lead text-white-50 mb-5 fw-light">
+                    Khám phá kho tàng đồ hiệu đã qua sử dụng được tuyển chọn kỹ lưỡng. Từ nội thất Vintage đến đồ công nghệ cao cấp.
+                </p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-shop btn-shop-primary">Xem Bộ Sưu Tập</a>
+                    <a href="#" class="btn btn-outline-light btn-shop">Ký Gửi Sản Phẩm</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2158&auto=format&fit=crop" class="w-100 h-100 object-fit-cover" style="min-height: 600px;" alt="Hero Image">
+        </div>
+    </div>
+</div>
+
+<div class="container py-5 border-bottom">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4 mb-md-0">
+            <div class="mb-3"><i class="bi bi-patch-check-fill fs-2 text-success"></i></div>
+            <h6 class="fw-bold text-uppercase">Cam Kết Chính Hãng</h6>
+            <p class="text-muted small">Mọi sản phẩm đều được thẩm định bởi chuyên gia</p>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+            <div class="mb-3"><i class="bi bi-arrow-counterclockwise fs-2 text-primary"></i></div>
+            <h6 class="fw-bold text-uppercase">Đổi Trả Trong 30 Ngày</h6>
+            <p class="text-muted small">Không ưng ý? Hoàn trả không cần lý do</p>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3"><i class="bi bi-recycle fs-2 text-warning"></i></div>
+            <h6 class="fw-bold text-uppercase">Tiêu Dùng Xanh</h6>
+            <p class="text-muted small">Mua đồ cũ là góp phần bảo vệ môi trường</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-muted small text-uppercase fw-bold ls-1">Tuyển Chọn Đặc Biệt</span>
+            <h2 class="mt-2">Mua Sắm Theo Danh Mục</h2>
+        </div>
+        <a href="#" class="text-decoration-none text-dark fw-bold border-bottom border-dark pb-1">Xem Tất Cả</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="position-relative h-100 bg-light p-4 d-flex flex-column justify-content-center align-items-center text-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/2965/2965256.png" width="120" class="mb-3 mix-blend-multiply">
+                <h4 class="fs-5">Túi Xách Hiệu</h4>
+                <p class="small text-muted">Luxury & Authentic</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row g-4 h-100">
+                <div class="col-12 h-50">
+                    <div class="position-relative h-100 overflow-hidden group-hover">
+                        <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=1000" class="w-100 h-100 object-fit-cover">
+                        <div class="position-absolute bottom-0 start-0 p-3 text-white w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                            <h5 class="mb-0">Đồ Cổ & Vintage</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 h-50">
+                    <div class="position-relative h-100 bg-primary d-flex align-items-center justify-content-center text-center text-white p-3">
+                        <div>
+                            <h4 class="mb-2">Nội Thất & Decor</h4>
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-pill px-4">Xem Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="position-relative h-100 w-100">
+                <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=2000" class="w-100 h-100 object-fit-cover">
+                <div class="position-absolute bottom-0 start-0 p-5 text-white w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                    <span class="badge bg-secondary mb-2">Đã Kiểm Định</span>
+                    <h3 class="font-serif">Đồ Công Nghệ Like New</h3>
+                    <p class="text-white-50">Hiệu năng đỉnh cao với mức giá hợp lý.</p>
+                    <a href="#" class="btn btn-light rounded-0 px-4 fw-bold">Khám Phá Tech</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+﻿@model IEnumerable<WebBH.Models.Order>
+
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h2 class="mt-4 text-white fw-bold">Danh sách đơn hàng</h2>
+
+    <div class="card mb-4 bg-dark border-secondary shadow">
+        <div class="card-body py-3">
+            <form asp-action="Index" method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="col-form-label text-white fw-bold">Tìm kiếm:</label>
+                </div>
+                <div class="col-auto flex-grow-1" style="max-width: 400px;">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                           class="form-control bg-dark text-white border-secondary"
+                           placeholder="Nhập mã đơn, tên hoặc email...">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Tìm
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-1">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4 bg-dark border-secondary shadow">
+        <div class="card-header border-secondary text-white fw-bold">
+            <i class="bi bi-table me-1"></i> Tổng hợp đơn hàng
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover align-middle border-secondary mb-0">
+                        <thead>
+                            <tr class="border-bottom border-secondary">
+                                <th>Mã Đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end" style="min-width: 150px;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                // Logic khóa nút nếu đơn đã hoàn tất
+                                bool isLocked = (item.Status == "Success" || item.Status == "Completed" || item.Status == "Cancelled");
+
+                                <tr>
+                                    <td class="fw-bold text-info">#@item.OrderId</td>
+                                    <td>
+                                        <span class="fw-bold text-white">@(item.User?.FullName ?? "Khách vãng lai")</span>
+                                        <br />
+                                        <small class="text-muted fst-italic">@(item.User?.Email ?? "---")</small>
+                                    </td>
+                                    <td>@item.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="fw-bold text-warning">@((item.TotalAmount ?? 0).ToString("N0")) đ</td>
+                                    <td>
+                                        @{
+                                            string badgeClass = "bg-secondary";
+                                            string statusText = "Chờ xử lý";
+                                            if (item.Status == "Pending") { badgeClass = "bg-warning text-dark"; statusText = "Chờ xác nhận"; }
+                                            else if (item.Status == "Packing") { badgeClass = "bg-info text-dark"; statusText = "Đang đóng gói"; }
+                                            else if (item.Status == "Shipping") { badgeClass = "bg-primary"; statusText = "Đang giao"; }
+                                            else if (item.Status == "Success" || item.Status == "Completed") { badgeClass = "bg-success"; statusText = "Hoàn thành"; }
+                                            else if (item.Status == "Cancelled") { badgeClass = "bg-danger"; statusText = "Đã hủy"; }
+                                        }
+                                        <span class="badge @badgeClass rounded-pill">@statusText</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.OrderId" class="btn btn-sm btn-info text-dark fw-bold me-1" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-warning text-dark fw-bold"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#updateStatusModal"
+                                                data-order-id="@item.OrderId"
+                                                data-current-status="@item.Status"
+                                                @(isLocked ? "disabled" : "")
+                                                title="@(isLocked ? "Đơn hàng đã chốt" : "Cập nhật trạng thái")">
+                                            <i class="bi bi-pencil-square"></i> @(isLocked ? "Đã chốt" : "Sửa")
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-dark text-center border-secondary text-muted">
+                    @if (ViewData["CurrentFilter"] != null)
+                    {
+                        <span>Không tìm thấy kết quả cho "<strong>@ViewData["CurrentFilter"]</strong>"</span>
+                    }
+                    else
+                    {
+                        <span>Chưa có đơn hàng nào trong hệ thống.</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold" id="updateStatusModalLabel">Cập nhật trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UpdateStatus" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="orderId" id="modalOrderId" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Mã đơn hàng đang chọn:</label>
+                        <span class="fw-bold text-info fs-5" id="displayOrderId">#...</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label fw-bold">Chọn trạng thái mới:</label>
+                        <select name="status" id="statusSelect" class="form-select bg-dark text-white border-secondary">
+                            <option value="Pending">🕒 Chờ xác nhận (Pending)</option>
+                            <option value="Packing">📦 Đang đóng gói (Packing)</option>
+                            <option value="Shipping">🚚 Đang vận chuyển (Shipping)</option>
+                            <option value="Success">✅ Hoàn thành (Success)</option>
+                            <option value="Cancelled">❌ Hủy đơn (Cancelled)</option>
+                        </select>
+                        <div class="form-text text-muted mt-2">
+                            <i class="bi bi-exclamation-triangle"></i> Lưu ý: Nếu chọn <strong>Hoàn thành</strong> hoặc <strong>Hủy đơn</strong>, bạn sẽ không thể chỉnh sửa lại sau này.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/order-index.js" asp-append-version="true"></script>
+}

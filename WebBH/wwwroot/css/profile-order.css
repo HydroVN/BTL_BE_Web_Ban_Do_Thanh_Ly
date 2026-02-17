@@ -1,0 +1,141 @@
+﻿/* Sidebar bên trái */
+.profile-sidebar {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.profile-user-info {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #212529;
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+}
+
+.profile-nav-link {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f1f1f1;
+    transition: all 0.3s ease;
+}
+
+    .profile-nav-link:hover {
+        background-color: #f8f9fa;
+        color: #000;
+        padding-left: 25px; /* Hiệu ứng trượt nhẹ */
+    }
+
+    .profile-nav-link.active {
+        background-color: #212529;
+        color: #fff;
+    }
+
+    .profile-nav-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+/* Card Đơn hàng */
+.order-card {
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    transition: box-shadow 0.3s ease;
+}
+
+    .order-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+.order-header {
+    background-color: #fff;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+}
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+.order-item-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    margin-right: 15px;
+}
+
+.order-footer {
+    background-color: #fcfcfc;
+    padding: 15px 20px;
+    border-top: 1px solid #f1f1f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Trạng thái đơn hàng (Badges) */
+.status-badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-packing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-shipping {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}

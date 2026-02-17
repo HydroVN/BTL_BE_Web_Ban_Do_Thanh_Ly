@@ -1,0 +1,234 @@
+﻿/* --- IMPORT FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+    --color-dark: #050505;
+    --color-primary: #0f3cd9; /* Xanh Re:Collect */
+    --color-text: #333;
+    --color-muted: #666;
+    --color-bg-light: #f9f9f9;
+    --color-border: #e5e5e5;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background-color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    color: var(--color-dark);
+}
+
+/* --- BUTTONS --- */
+.btn-shop {
+    padding: 12px 28px;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-shop-primary {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+}
+
+    .btn-shop-primary:hover {
+        background: #0b2cb0;
+        color: white;
+    }
+
+.btn-shop-outline {
+    background: transparent;
+    border: 1px solid var(--color-dark);
+    color: var(--color-dark);
+}
+
+    .btn-shop-outline:hover {
+        background: var(--color-dark);
+        color: white;
+    }
+
+/* --- PRODUCT CARD STYLE --- */
+.product-card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 2rem;
+    background: #fff;
+    position: relative;
+}
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        z-index: 10;
+    }
+
+.product-img-wrap {
+    position: relative;
+    background: #f8f8f8;
+    padding-top: 100%; /* Tạo khung vuông 1:1 */
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+    .product-img-wrap img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+/* Hiệu ứng zoom nhẹ khi hover */
+.product-card:hover .product-img-wrap img {
+    transform: scale(1.05);
+}
+
+/* Badge (Nhãn dán trên ảnh) */
+.condition-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: white;
+    padding: 5px 10px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    z-index: 2;
+}
+
+    .condition-badge.mint {
+        color: #00b894;
+        border-color: #00b894;
+    }
+
+    .condition-badge.good {
+        color: #0984e3;
+        border-color: #0984e3;
+    }
+
+/* Thông tin sản phẩm */
+.product-info h5 {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--color-dark);
+    line-height: 1.4;
+}
+
+.product-brand {
+    font-size: 0.75rem;
+    color: #999;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.product-price {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-primary);
+}
+
+.verified-seller {
+    font-size: 0.7rem;
+    color: #27ae60;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- FILTER SIDEBAR (CHECKBOX CUSTOM) --- */
+.filter-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 1.2rem;
+    color: var(--color-dark);
+    display: block;
+}
+
+/* Custom Checkbox Container */
+.custom-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #666;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+    .custom-checkbox-label:hover {
+        color: #000;
+    }
+
+    /* Ẩn input mặc định */
+    .custom-checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+/* Ô vuông giả (Custom Checkmark) */
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #d1d5db; /* Viền xám */
+    background-color: #fff;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Không bị co lại */
+}
+
+/* Khi Checked: Đổi nền sang đen */
+.custom-checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background-color: #000;
+    border-color: #000;
+}
+
+/* Dấu tích trắng */
+.checkmark::after {
+    content: '';
+    display: none;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+/* Hiện dấu tích khi checked */
+.custom-checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    display: block;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 991px) {
+    .filter-sidebar {
+        display: none; /* Ẩn sidebar trên mobile nếu chưa làm menu con */
+    }
+}

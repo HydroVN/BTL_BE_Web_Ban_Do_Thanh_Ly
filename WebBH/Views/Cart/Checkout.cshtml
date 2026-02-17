@@ -1,0 +1,136 @@
+﻿@model IEnumerable<WebBH.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+
+<div class="container py-5 mt-4">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <h4 class="fw-bold mb-4 border-bottom pb-2">Thông tin thanh toán</h4>
+            <div class="bg-light p-4 rounded shadow-sm">
+                <form action="/Cart/ConfirmOrder" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Họ tên người nhận</label>
+                        <input type="text" name="fullName" class="form-control" required placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Số điện thoại</label>
+                        <input type="text" name="phone" class="form-control" required placeholder="Ví dụ: 098...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Địa chỉ giao hàng</label>
+                        <textarea name="address" class="form-control" rows="3" required placeholder="Số nhà, tên đường, phường/xã..."></textarea>
+                    </div>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <button type="submit" class="btn btn-dark btn-lg w-100 mt-3 fw-bold rounded-0">
+                            XÁC NHẬN ĐẶT HÀNG
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mt-3">Giỏ hàng đang trống. Vui lòng thêm sản phẩm!</div>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-4">Giỏ hàng (@(Model?.Sum(x => x.Quantity) ?? 0) sản phẩm)</h5>
+
+                <div id="cart-items-container">
+                    @if (Model != null)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <div class="cart-item-row" id="row-@item.CartItemId">
+                                <img src="@item.Product.ImageUrl" class="cart-item-img me-3" alt="@item.Product.Name">
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-0 fw-bold small text-truncate" style="max-width: 150px;">
+                                            @item.Product.Name
+                                        </h6>
+
+                                        <button type="button" class="btn-remove"
+                                                onclick="openDeleteModal('@item.CartItemId', '@item.Product.Name', '@item.Product.ImageUrl')"
+                                                title="Xóa sản phẩm này">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <small class="text-muted d-block mb-1">
+                                        Size: @item.Size | Màu: @item.Color
+                                    </small>
+
+                                    <div class="d-flex justify-content-between align-items-end mt-2">
+                                        <div class="quantity-control">
+                                            <button type="button" class="btn-qty" onclick="updateQty(@item.CartItemId, -1)">-</button>
+                                            <span class="qty-display" id="qty-@item.CartItemId">@item.Quantity</span>
+                                            <button type="button" class="btn-qty" onclick="updateQty(@item.CartItemId, 1)">+</button>
+                                        </div>
+
+                                        <div class="fw-bold text-primary" id="price-@item.CartItemId">
+                                            @((item.Product.Price * item.Quantity).ToString("N0")) đ
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="total-section mt-4">
+                    <div class="d-flex justify-content-between h5 fw-bold mb-0 text-dark">
+                        <span>Tổng cộng:</span>
+                        <span id="cart-total-price">
+                            @(Model?.Sum(x => x.Product.Price * x.Quantity).ToString("N0") ?? "0") đ
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="delete-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h4 class="modal-title-confirm">Xóa sản phẩm?</h4>
+        <p class="modal-desc">Bạn có chắc chắn muốn xóa sản phẩm này khỏi đơn hàng không? Hành động này không thể hoàn tác.</p>
+
+        <div class="modal-item-preview">
+            <img id="del-modal-img" src="" class="modal-item-img" alt="Product Image" />
+            <span id="del-modal-name" class="modal-item-name">Tên sản phẩm</span>
+        </div>
+
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-confirm-del" onclick="confirmDelete()">Xác nhận xóa</button>
+            <button class="modal-btn btn-cancel-del" onclick="closeDeleteModal()">Quay lại</button>
+        </div>
+    </div>
+</div>
+<div id="alert-toast">
+    <div class="toast-card">
+        <div class="toast-icon-wrapper">
+            <i class="bi bi-info-circle-fill"></i>
+        </div>
+        <div class="toast-content">
+            <h6 class="toast-title" id="toast-title">Thông báo</h6>
+            <p class="toast-message" id="toast-message"></p>
+            <a href="javascript:void(0)" onclick="closeToast()" class="toast-dismiss">Đóng thông báo</a>
+        </div>
+        <button type="button" class="toast-close-btn" onclick="closeToast()">&times;</button>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
+}

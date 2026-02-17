@@ -1,0 +1,134 @@
+/* ================= BASE ================= */
+
+body:not(.admin-layout) {
+    background: white;
+    color: black;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+/* ================= SIDEBAR ================= */
+
+.admin-sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: linear-gradient(180deg,#05080f,#0c1220);
+    padding: 20px 0;
+    transition: all .3s ease;
+    z-index: 1000;
+}
+
+    .admin-sidebar.collapsed {
+        width: 80px;
+    }
+
+/* LOGO */
+
+.sidebar-logo {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 30px;
+}
+
+/* MENU */
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 22px;
+        color: #cbd5f5;
+        transition: .2s;
+    }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background: rgba(59,130,246,.15);
+            color: #3b82f6;
+        }
+
+/* TEXT */
+
+.sidebar-text {
+    transition: opacity .2s;
+}
+
+.admin-sidebar.collapsed .sidebar-text {
+    display: none;
+}
+
+/* USER */
+
+.sidebar-user {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ================= MAIN ================= */
+
+.admin-main {
+    margin-left: 260px;
+    min-height: 100vh;
+    transition: all .3s ease;
+}
+
+    .admin-main.collapsed {
+        margin-left: 80px;
+    }
+
+/* ================= NAVBAR ================= */
+
+.admin-navbar {
+    height: 64px;
+    background: linear-gradient(180deg,#05080f,#0c1220);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+/* ================= TOGGLE ================= */
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.15);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    color: white;
+}
+
+/* ================= CARDS ================= */
+
+.stat-card {
+    border-radius: 14px;
+    padding: 24px;
+    font-size: 20px;
+}

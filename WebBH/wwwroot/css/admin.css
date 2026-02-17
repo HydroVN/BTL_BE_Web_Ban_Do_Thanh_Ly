@@ -1,0 +1,351 @@
+﻿/* ================= RESET CHO ADMIN ================= */
+html, body {
+    height: 100%;
+}
+
+    body.admin-layout {
+        margin: 0;
+        background: #07090d !important;
+        color: #e2e8f0; /* Màu chữ sáng nhẹ (Slate-200) thay vì trắng tinh */
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+    }
+
+/* ================= WRAPPER ================= */
+.admin-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width: 90px;
+    min-width: 90px;
+    height: 100vh;
+    background: #05070b !important;
+    /* Đổi màu viền sang tông xanh đen (Slate-800) */
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    flex-shrink: 0;
+    position: relative;
+    transition: all .45s cubic-bezier(.4,0,.2,1);
+    overflow-x: hidden;
+    z-index: 1000;
+}
+
+    .sidebar.expanded {
+        width: 240px;
+        min-width: 240px;
+    }
+
+    .sidebar .logo {
+        font-size: 26px;
+        text-align: center;
+        color: #3b82f6; /* Blue-500 */
+        margin-bottom: 1rem;
+    }
+
+    .sidebar .nav-link {
+        color: #94a3b8; /* Slate-400: Màu xám xanh dễ đọc hơn */
+        padding: 14px 20px;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        white-space: nowrap;
+        transition: background .25s, color .25s, border-right .25s;
+        border-right: 3px solid transparent;
+    }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #0f172a; /* Slate-900 */
+            color: #fff;
+            border-right-color: #3b82f6; /* Thêm điểm nhấn khi active */
+        }
+
+    /* TEXT ANIMATION */
+    .sidebar span {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        transform: translateX(-12px);
+        transition: opacity 0.1s ease, transform 0.1s ease, width 0.1s ease;
+    }
+
+    .sidebar.expanded span {
+        opacity: 1;
+        width: auto;
+        transform: translateX(0);
+        transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s, width 0.3s ease 0.2s;
+    }
+
+/* USER BOX */
+.user-box {
+    border-top: 1px solid #1e293b; /* Đồng bộ màu viền */
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    transition: background .25s;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+    .user-box:hover {
+        background: #0f172a;
+    }
+
+.user-info {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transform: translateX(-10px);
+    transition: opacity 0.1s ease, transform 0.1s ease, width 0.1s ease;
+}
+
+.sidebar.expanded .user-info {
+    opacity: 1;
+    visibility: visible;
+    width: 100%;
+    transform: translateX(0);
+    transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s, width 0.3s ease 0.2s;
+}
+
+.user-info strong {
+    color: #fff;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.user-info .text-muted {
+    color: #94a3b8 !important; /* Slate-400 */
+    font-size: 0.75rem;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+}
+
+/* ================= MAIN & CONTENT ================= */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #07090d !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.topbar {
+    height: 60px;
+    padding: 0 24px;
+    border-bottom: 1px solid #1e293b; /* Đồng bộ màu viền */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #020617 !important;
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+    .btn-icon:hover {
+        background: #1e293b;
+        color: #fff;
+        border-color: #475569;
+    }
+
+.content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+}
+
+/* ================= COMPONENT OVERRIDES (SỬA LỖI MÀU CHỮ) ================= */
+
+/* 1. Cards - Chuyển sang nền tối */
+.card {
+    background-color: #0f172a !important; /* Slate-900 */
+    border: 1px solid #1e293b !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+    background-color: rgba(30, 41, 59, 0.5) !important; /* Slate-800 mờ */
+    border-bottom: 1px solid #1e293b !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+.stat-card {
+    background: linear-gradient(145deg, #0f172a, #020617);
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid #1e293b;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. Tables - Sửa lỗi chữ đen trên nền tối */
+.table {
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+    .table > :not(caption) > * > * {
+        background-color: transparent !important; /* Xóa nền trắng mặc định của Bootstrap */
+        color: #e2e8f0 !important;
+        border-bottom-color: #334155 !important;
+    }
+
+    .table thead th {
+        color: #94a3b8 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #334155 !important;
+    }
+
+.table-hover > tbody > tr:hover > * {
+    background-color: #1e293b !important; /* Màu highlight khi hover chuột */
+    color: #fff !important;
+}
+
+/* 3. Forms & Inputs - Chuyển sang dark mode */
+.form-control, .form-select {
+    background-color: #020617 !important;
+    border: 1px solid #334155 !important;
+    color: #fff !important;
+}
+
+    .form-control:focus, .form-select:focus {
+        background-color: #020617 !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+        color: #fff !important;
+    }
+
+    .form-control::placeholder {
+        color: #64748b !important;
+    }
+
+/* 4. Dropdown Menu (User menu) */
+.dropdown-menu-dark {
+    background-color: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+.dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+    .dropdown-item:hover {
+        background-color: #1e293b !important;
+        color: #fff !important;
+    }
+
+.dropdown-divider {
+    border-top-color: #1e293b !important;
+}
+
+/* 5. Tiện ích khác */
+hr {
+    border-color: #334155 !important;
+    opacity: 0.5;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+    .sidebar {
+        position: absolute;
+        z-index: 1050;
+        left: -90px;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+        .sidebar.expanded {
+            left: 0;
+            width: 240px;
+        }
+
+    .main {
+        width: 100vw;
+    }
+
+    .topbar {
+        padding: 0 15px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+}
+/* ================= QUẢN LÝ SẢN PHẨM ================= */
+
+/* Ảnh thumbnail trong bảng */
+.table-img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    background-color: #1e293b; /* Slate-800 */
+    border-radius: 6px;
+    border: 1px solid #334155;
+}
+
+/* Tùy chỉnh Modal cho khớp với Dark Theme */
+.modal-content.bg-dark {
+    background-color: #0f172a !important; /* Slate-900 */
+    border: 1px solid #1e293b;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header, .modal-footer {
+    border-color: #1e293b !important;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Form upload ảnh */
+input[type="file"]::file-selector-button {
+    background-color: #334155;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin-right: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+    input[type="file"]::file-selector-button:hover {
+        background-color: #475569;
+    }

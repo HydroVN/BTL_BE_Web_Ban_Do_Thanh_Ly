@@ -1,0 +1,81 @@
+﻿@model WebBH.Models.Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<link rel="stylesheet" href="~/css/order-success.css" asp-append-version="true" />
+
+<div class="container">
+    <div class="success-container">
+
+        <div class="success-icon-wrapper">
+            <i class="bi bi-check-lg"></i>
+        </div>
+
+        <h1 class="success-title">Cảm ơn bạn đã đặt hàng</h1>
+        <p class="success-subtitle">Đơn hàng của bạn đã được tiếp nhận và đang chờ xử lý.</p>
+
+        <div class="alert alert-success d-flex align-items-center justify-content-center gap-3 mb-4 text-start border-0" style="background-color: #f0fdf4; color: #14532d;">
+            <i class="bi bi-flower1 fs-3"></i>
+            <div>
+                <strong>Tiết kiệm bền vững:</strong>
+                <span class="small d-block">Bằng cách chọn thời trang secondhand, bạn đã góp phần giảm thiểu rác thải thời trang.</span>
+            </div>
+        </div>
+
+        <div class="order-summary-box">
+            <div class="order-id-row">
+                <span class="text-muted text-uppercase small">Mã đơn hàng</span>
+                <span>#ORD-@Model.OrderId</span>
+            </div>
+            <div class="order-id-row">
+                <span class="text-muted text-uppercase small">Ngày đặt</span>
+                <span>@Model.OrderDate?.ToString("dd 'thg' MM, yyyy")</span>
+            </div>
+
+            <div class="py-3 border-bottom mb-3">
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span>@item.Product?.Name <span class="text-muted">x @item.Quantity</span></span>
+                        <span class="fw-bold">@((item.UnitPrice * item.Quantity).ToString("N0")) đ</span>
+                    </div>
+                }
+            </div>
+
+            <div class="order-total-row">
+                <span>Tổng cộng</span>
+                <span>@Model.TotalAmount?.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        <h5 class="text-start fw-bold mb-4">Các bước tiếp theo</h5>
+        <div class="next-steps row">
+            <div class="col-md-4 step-item">
+                <i class="bi bi-envelope step-icon"></i>
+                <h6>Xác nhận</h6>
+                <p>Bạn sẽ nhận được email xác nhận đơn hàng trong giây lát.</p>
+            </div>
+            <div class="col-md-4 step-item">
+                <i class="bi bi-box-seam step-icon"></i>
+                <h6>Đóng gói</h6>
+                <p>Chúng tôi sẽ kiểm tra và đóng gói sản phẩm cẩn thận.</p>
+            </div>
+            <div class="col-md-4 step-item">
+                <i class="bi bi-truck step-icon"></i>
+                <h6>Vận chuyển</h6>
+                <p>Đơn vị vận chuyển sẽ liên hệ bạn khi hàng đến nơi.</p>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/Order/Details/@Model.OrderId" class="btn btn-track text-decoration-none">
+                Theo dõi đơn hàng
+            </a>
+
+            <a href="/Product" class="btn btn-continue text-decoration-none">
+                Tiếp tục mua sắm
+            </a>
+        </div>
+    </div>
+</div>

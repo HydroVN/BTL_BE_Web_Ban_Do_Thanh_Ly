@@ -1,0 +1,234 @@
+.auth-container {
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+.auth-brand {
+	width: 50%;
+	background: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop') center/cover;
+	position: relative;
+}
+
+.brand-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.6);
+}
+
+.short-hr {
+	width: 50px;
+	border: 2px solid #fff;
+	opacity: 1;
+	margin-bottom: 2rem;
+}
+
+.auth-form-side {
+	width: 50%;
+	background: #fff;
+}
+
+.logo-circle {
+	width: 24px;
+	height: 24px;
+	background: #2563eb;
+	border-radius: 50%;
+}
+
+.form-control:focus {
+	box-shadow: none;
+	border-color: #2563eb !important;
+}
+
+.btn-primary {
+	background: #2563eb;
+	border: none;
+}
+
+/* Layout chung */
+.auth-wrapper {
+	min-height: 100vh;
+	overflow: hidden;
+}
+
+/* C?t hình ?nh (Bên trái) */
+.auth-visual {
+	background-color: #050505; /* Màu n?n ?en nh? hình */
+	background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop'); /* ?nh ??ng h? demo */
+	background-size: cover;
+	background-position: center;
+	position: relative;
+}
+
+	/* L?p ph? ?en m? ?? ch? tr?ng n?i b?t h?n */
+	.auth-visual::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9));
+	}
+
+.visual-content {
+	position: relative;
+	z-index: 2;
+	padding: 4rem;
+}
+
+.brand-line {
+	width: 40px;
+	height: 4px;
+	background-color: #fff;
+	margin-bottom: 2rem;
+}
+
+/* C?t Form (Bên ph?i) */
+.auth-form-container {
+	background-color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+}
+
+.form-wrapper {
+	width: 100%;
+	max-width: 420px;
+}
+
+/* Tùy ch?nh Input (Ch? g?ch chân) */
+.custom-input-group {
+	margin-bottom: 1.5rem;
+}
+
+.custom-input-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: #888;
+	margin-bottom: 0.5rem;
+	display: block;
+}
+
+.custom-input {
+	width: 100%;
+	border: none;
+	border-bottom: 1px solid #ddd;
+	border-radius: 0;
+	padding: 0.5rem 0;
+	font-size: 1rem;
+	color: #333;
+	background: transparent;
+	transition: border-color 0.3s;
+}
+
+	.custom-input:focus {
+		outline: none;
+		border-bottom-color: #000; /* ??i màu g?ch chân khi click vào */
+		box-shadow: none;
+	}
+
+/* Nút b?m ?en */
+.btn-black {
+	background-color: #1a1a1a;
+	color: #fff;
+	border: none;
+	padding: 1rem;
+	font-weight: 500;
+	letter-spacing: 0.5px;
+	transition: all 0.3s;
+}
+
+	.btn-black:hover {
+		background-color: #000;
+		color: #fff;
+		transform: translateY(-1px);
+	}
+
+.verified-badge {
+	background-color: #f8f9fa;
+	padding: 0.5rem 1rem;
+	border-radius: 50px;
+	font-size: 0.8rem;
+	color: #555;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+@media (max-width: 992px) {
+	.auth-brand {
+		display: none;
+	}
+
+	.auth-form-side {
+		width: 100%;
+	}
+}
+#password-requirements {
+	display: none;
+	background: #fff;
+	padding: 15px;
+	border: 1px solid #eee;
+	border-radius: 8px;
+	box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+	margin-top: 10px;
+	font-size: 0.85rem;
+	transition: all 0.3s ease;
+}
+
+.requirement-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 5px;
+	color: #dc3545; /* Màu ?? */
+	transition: color 0.3s;
+}
+
+	.requirement-item.valid {
+		color: #198754; /* Màu xanh */
+	}
+
+	.requirement-item i {
+		font-size: 1rem;
+	}
+
+/* Hi?u ?ng rung khi nh?p sai */
+.input-error {
+	border-bottom-color: #dc3545 !important;
+	animation: shake 0.3s;
+}
+
+@keyframes shake {
+	0% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateX(-5px);
+	}
+
+	50% {
+		transform: translateX(5px);
+	}
+
+	75% {
+		transform: translateX(-5px);
+	}
+
+	100% {
+		transform: translateX(0);
+	}
+}
+
+/* Thông báo kh?p m?t kh?u */
+#match-message {
+	font-size: 1.2rem;
+	transition: all 0.2s;
+}

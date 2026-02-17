@@ -1,0 +1,387 @@
+﻿/* Layout danh sách sản phẩm */
+.cart-item-row {
+    display: flex;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.cart-item-img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Bộ điều khiển số lượng (+ -) */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+    width: fit-content;
+}
+
+.btn-qty {
+    background: #fff;
+    border: none;
+    padding: 2px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-qty:hover {
+        background: #f8f9fa;
+    }
+
+.qty-display {
+    padding: 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+}
+
+/* Nút xóa */
+.btn-remove {
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 5px;
+    margin-left: 10px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+    .btn-remove:hover {
+        opacity: 1;
+    }
+
+/* Tổng tiền */
+.total-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Nền tối mờ */
+    backdrop-filter: blur(2px); /* Làm mờ hậu cảnh */
+    display: none; /* Mặc định ẩn */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: white;
+    width: 380px;
+    padding: 25px;
+    border-radius: 16px; /* Bo tròn mềm mại */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    animation: zoomIn 0.2s ease-out;
+    position: relative;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-title-confirm {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.modal-desc {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* Review sản phẩm trong modal */
+.modal-item-preview {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    border: 1px solid #eee;
+}
+
+.modal-item-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-right: 12px;
+    border: 1px solid #ddd;
+}
+
+.modal-item-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Nút bấm trong modal */
+.modal-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 30px; /* Bo tròn hình con nhộng */
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-confirm-del {
+    background: #000;
+    color: #fff;
+}
+
+    .btn-confirm-del:hover {
+        background: #333;
+    }
+
+.btn-cancel-del {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #333;
+}
+
+    .btn-cancel-del:hover {
+        background: #f1f1f1;
+    }
+.stock-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #0f172a; /* Màu nền tối (Dark Navy) */
+    color: #e2e8f0; /* Màu chữ trắng xám */
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    z-index: 10000;
+    min-width: 350px;
+    border-left: 4px solid #2563eb; /* Thanh xanh dương bên trái */
+    /* Hiệu ứng ẩn hiện */
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+    pointer-events: none; /* Không chặn click khi ẩn */
+}
+
+    .stock-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+/* Icon chữ i tròn màu xanh */
+.toast-icon {
+    background-color: #1e3a8a; /* Xanh đậm nền icon */
+    color: #3b82f6; /* Xanh sáng chữ icon */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #fff;
+    letter-spacing: 0.3px;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: #94a3b8; /* Màu xám nhạt */
+    line-height: 1.4;
+}
+
+    .toast-message strong {
+        color: #fff; /* Số lượng tô đậm màu trắng */
+    }
+
+/* Link điều chỉnh (nếu cần) */
+.toast-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+    .toast-link:hover {
+        color: #60a5fa;
+        text-decoration: underline;
+    }
+
+/* Nút tắt X */
+.toast-close {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+    .toast-close:hover {
+        color: #fff;
+    }
+#alert-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999999; /* Luôn nổi lên trên cùng */
+    /* Mặc định ẩn */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%); /* Trượt sang phải để ẩn */
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+    /* Class này được JS thêm vào để hiện Toast */
+    #alert-toast.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0); /* Trượt vào */
+    }
+
+.toast-card {
+    background-color: #0f172a; /* Nền màu tối (Dark Navy) */
+    border-left: 4px solid #3b82f6; /* Viền xanh dương */
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 320px;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Đổ bóng */
+    display: flex;
+    gap: 15px;
+    color: #cbd5e1; /* Màu chữ xám sáng */
+    font-family: 'Segoe UI', sans-serif;
+    position: relative;
+}
+
+.toast-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    background-color: #1e3a8a; /* Nền tròn xanh đậm */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #60a5fa; /* Màu icon */
+    font-size: 18px;
+}
+
+.toast-content {
+    flex: 1;
+    padding-right: 20px; /* Chừa chỗ cho nút X */
+}
+
+.toast-title {
+    color: #fff; /* Tiêu đề màu trắng */
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toast-message {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+}
+
+    .toast-message strong {
+        color: #fff;
+        font-weight: 700;
+    }
+
+.toast-dismiss {
+    color: #60a5fa;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+    .toast-dismiss:hover {
+        color: #93c5fd;
+        text-decoration: underline;
+    }
+
+.toast-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+    .toast-close-btn:hover {
+        color: #fff;
+    }
