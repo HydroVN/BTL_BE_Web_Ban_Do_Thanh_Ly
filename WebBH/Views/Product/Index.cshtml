@@ -88,14 +88,45 @@
                                              style="height: 350px;" alt="@item.Name">
                                     </div>
 
-                                    <div class="product-info d-flex justify-content-between align-items-start px-1">
-                                        <div>
-                                            <h5 class="fw-bold mb-1 fs-6">@item.Name</h5>
-                                            <div class="product-brand text-muted small text-uppercase ls-1">
-                                                @(item.Category != null ? item.Category.Name : "Sản phẩm")
+                                    <div class="product-info px-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <div>
+                                                <h5 class="fw-bold mb-1 fs-6">@item.Name</h5>
+                                                <div class="product-brand text-muted small text-uppercase ls-1">
+                                                    @(item.Category != null ? item.Category.Name : "Sản phẩm")
+                                                </div>
                                             </div>
+                                            <div class="product-price fw-bold text-primary">@item.Price.ToString("N0") đ</div>
                                         </div>
-                                        <div class="product-price fw-bold text-primary">@item.Price.ToString("N0") đ</div>
+
+                                        <div class="d-flex align-items-center mt-2">
+                                            <div class="text-warning small me-2" style="font-size: 0.8rem;">
+                                                @{
+                                                    // SỬA LỖI TẠI ĐÂY: Thêm '?? 0' vào sau hàm Average(...)
+                                                    double avgRating = item.Reviews != null && item.Reviews.Any()
+                                                    ? (item.Reviews.Average(r => r.Rating) ?? 0)
+                                                    : 0;
+
+                                                    double rating = Math.Round(avgRating * 2) / 2;
+                                                    int fullStars = (int)rating;
+                                                    bool hasHalfStar = (rating - fullStars) >= 0.5;
+                                                    int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                                                }
+                                                @for (int i = 0; i < fullStars; i++)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                @if (hasHalfStar)
+                                                {
+                                                    <i class="bi bi-star-half"></i>
+                                                }
+                                                @for (int i = 0; i < emptyStars; i++)
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            </div>
+                                            <span class="text-muted small" style="font-size: 0.75rem;">(@(item.Reviews?.Count ?? 0))</span>
+                                        </div>
                                     </div>
                                 </a>
                             </div>

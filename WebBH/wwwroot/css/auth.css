@@ -54,16 +54,16 @@
 	overflow: hidden;
 }
 
-/* C?t h�nh ?nh (B�n tr�i) */
+/* Cột hình ảnh (Bên trái) */
 .auth-visual {
-	background-color: #050505; /* M�u n?n ?en nh? h�nh */
-	background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop'); /* ?nh ??ng h? demo */
+	background-color: #050505; /* Màu nền đen như hình */
+	background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop');
 	background-size: cover;
 	background-position: center;
 	position: relative;
 }
 
-	/* L?p ph? ?en m? ?? ch? tr?ng n?i b?t h?n */
+	/* Lớp phủ đen mờ để chữ trắng nổi bật hơn */
 	.auth-visual::before {
 		content: '';
 		position: absolute;
@@ -87,7 +87,7 @@
 	margin-bottom: 2rem;
 }
 
-/* C?t Form (B�n ph?i) */
+/* Cột Form (Bên phải) */
 .auth-form-container {
 	background-color: #fff;
 	display: flex;
@@ -101,7 +101,7 @@
 	max-width: 420px;
 }
 
-/* T�y ch?nh Input (Ch? g?ch ch�n) */
+/* Tùy chỉnh Input (Chỉ gạch chân) */
 .custom-input-group {
 	margin-bottom: 1.5rem;
 }
@@ -130,11 +130,11 @@
 
 	.custom-input:focus {
 		outline: none;
-		border-bottom-color: #000; /* ??i m�u g?ch ch�n khi click v�o */
+		border-bottom-color: #000; /* Đổi màu gạch chân khi click vào */
 		box-shadow: none;
 	}
 
-/* N�t b?m ?en */
+/* Nút bấm đen */
 .btn-black {
 	background-color: #1a1a1a;
 	color: #fff;
@@ -161,6 +161,7 @@
 	align-items: center;
 	gap: 8px;
 }
+
 @media (max-width: 992px) {
 	.auth-brand {
 		display: none;
@@ -170,6 +171,8 @@
 		width: 100%;
 	}
 }
+
+/* --- PHẦN STYLE CHO MẬT KHẨU --- */
 #password-requirements {
 	display: none;
 	background: #fff;
@@ -187,19 +190,21 @@
 	align-items: center;
 	gap: 10px;
 	margin-bottom: 5px;
-	color: #dc3545; /* M�u ?? */
+	color: #dc3545; /* Màu đỏ mặc định */
 	transition: color 0.3s;
 }
 
+	/* Khi đạt yêu cầu (JS thêm class .valid) */
 	.requirement-item.valid {
-		color: #198754; /* M�u xanh */
+		color: #198754; /* Màu xanh lá */
+		font-weight: 500;
 	}
 
 	.requirement-item i {
 		font-size: 1rem;
 	}
 
-/* Hi?u ?ng rung khi nh?p sai */
+/* Hiệu ứng rung khi nhập sai */
 .input-error {
 	border-bottom-color: #dc3545 !important;
 	animation: shake 0.3s;
@@ -227,7 +232,7 @@
 	}
 }
 
-/* Th�ng b�o kh?p m?t kh?u */
+/* Thông báo khớp mật khẩu */
 #match-message {
 	font-size: 1.2rem;
 	transition: all 0.2s;

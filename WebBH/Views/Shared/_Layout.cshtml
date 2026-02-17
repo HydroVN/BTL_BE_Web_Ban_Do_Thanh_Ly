@@ -49,9 +49,13 @@
                             <div class="dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                     <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
-                                        <span class="fw-bold" style="font-size: 0.8rem;">@User.Identity.Name.Substring(0, 1).ToUpper()</span>
+                                        <span class="fw-bold" style="font-size: 0.8rem;">
+                                            @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                        </span>
                                     </div>
-                                    <span class="fw-semibold d-none d-lg-block">@User.Identity.Name</span>
+                                    <span class="fw-semibold d-none d-lg-block">
+                                        @(User.Identity.Name ?? "User")
+                                    </span>
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 p-2 rounded-0">

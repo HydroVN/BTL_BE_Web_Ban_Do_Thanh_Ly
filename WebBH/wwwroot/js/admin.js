@@ -55,7 +55,8 @@ function openProductModal(id) {
                 // Load variants
                 if (data.variants && data.variants.length > 0) {
                     data.variants.forEach(v => {
-                        addVariantRow(v.size, v.color, v.quantity);
+                        // Xử lý hiển thị null thành chuỗi rỗng để không hiện chữ "null" lên ô input
+                        addVariantRow(v.size || '', v.color || '', v.quantity);
                     });
                 }
             })
@@ -101,7 +102,11 @@ function saveProduct() {
         const color = row.querySelector('.variant-color').value.trim();
         const qty = row.querySelector('.variant-qty').value;
 
-        if (size && color) {
+        // --- SỬA ĐỔI TẠI ĐÂY ---
+        // Cũ: if (size && color) -> Bắt buộc cả hai
+        // Mới: if (size || color) -> Chỉ cần một trong hai (hoặc cả hai)
+        // Nếu bạn muốn cho phép để trống cả 2 (chỉ nhập số lượng), hãy bỏ luôn điều kiện if này.
+        if (size || color || qty) {
             variants.push({ Size: size, Color: color, Quantity: parseInt(qty) || 0 });
         }
     });

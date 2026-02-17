@@ -17,23 +17,22 @@ namespace WebBH.Controllers
         // GET: /Product
         public async Task<IActionResult> Index(int? categoryId, string sortOrder)
         {
-            // 1. Query cơ bản
             var products = _context.Products
                 .Include(p => p.Category)
-                .Include(p => p.ProductVariants) // Load biến thể nếu cần hiển thị size/màu
+                .Include(p => p.ProductVariants)
+                .Include(p => p.Reviews) // <--- QUAN TRỌNG: Phải thêm dòng này mới hiện sao
+                .Where(p => p.IsActive == true) // Chỉ lấy sản phẩm đang bán
                 .AsQueryable();
 
-            // 2. Chỉ lấy sản phẩm ACTIVE
+            // Chỉ lấy sản phẩm ACTIVE (So sánh với true để xử lý trường hợp null)
             products = products.Where(p => p.IsActive == true);
 
-            // 3. Lọc theo Category (Nếu có chọn)
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.CategoryId == categoryId);
             }
 
-            // 4. Sắp xếp
-            ViewBag.CurrentSort = sortOrder; // Giữ lại giá trị sort để bind vào View
+            ViewBag.CurrentSort = sortOrder;
             switch (sortOrder)
             {
                 case "price_asc":
@@ -42,12 +41,11 @@ namespace WebBH.Controllers
                 case "price_desc":
                     products = products.OrderByDescending(p => p.Price);
                     break;
-                default: // Mặc định: Mới nhất
-                    products = products.OrderByDescending(p => p.ProductId); // Hoặc CreatedAt
+                default:
+                    products = products.OrderByDescending(p => p.ProductId);
                     break;
             }
 
-            // 5. Lấy danh sách Category để hiển thị Filter bên trái
             ViewBag.Categories = await _context.Categories.ToListAsync();
             ViewBag.CurrentCategory = categoryId;
 
@@ -60,8 +58,7 @@ namespace WebBH.Controllers
             var product = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductVariants)
-                // QUAN TRỌNG: Nạp danh sách đánh giá và thông tin người dùng đánh giá
-                .Include(p => p.Reviews.OrderByDescending(r => r.CreatedAt))
+                .Include(p => p.Reviews) // Chỉ load Reviews, không sort ở đây
                     .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
 

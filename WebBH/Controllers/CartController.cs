@@ -12,17 +12,27 @@ namespace WebBH.Controllers
     {
         private readonly WebThanhLyDbContext _context;
         public CartController(WebThanhLyDbContext context) => _context = context;
-        // 1. THÊM VÀO GIỎ & MUA NGAY
+
+        // 1. THÊM VÀO GIỎ
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddToCart(int productId, int quantity, string size, string color)
+        public async Task<IActionResult> AddToCart(int productId, int quantity, string? size, string? color)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
-            bool result = await ProcessAddToCart(userId, productId, quantity, size, color);
-            if (!result) return NotFound();
+
+            // Gọi hàm xử lý và nhận thông báo lỗi (nếu có)
+            string errorMessage = await ProcessAddToCart(userId, productId, quantity, size, color);
+
+            // Nếu có thông báo lỗi (chuỗi không rỗng) -> Trả về lỗi cho Client
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                return Json(new { success = false, message = errorMessage });
+            }
+
             var product = await _context.Products.FindAsync(productId);
             var totalCount = await _context.CartItems.Where(c => c.UserId == userId).SumAsync(c => c.Quantity);
+
             return Json(new
             {
                 success = true,
@@ -30,53 +40,100 @@ namespace WebBH.Controllers
                 newItem = new { name = product.Name, imageUrl = product.ImageUrl, price = product.Price.ToString("N0") + " đ", size, color }
             });
         }
+
+        // 2. MUA NGAY
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BuyNow(int productId, int quantity, string size, string color)
+        public async Task<IActionResult> BuyNow(int productId, int quantity, string? size, string? color)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return RedirectToAction("Login", "Account");
 
-            await ProcessAddToCart(userId, productId, quantity, size, color);
+            string errorMessage = await ProcessAddToCart(userId, productId, quantity, size, color);
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                // Nếu lỗi, quay lại trang chi tiết và báo lỗi (Dùng TempData)
+                TempData["Error"] = errorMessage;
+                return RedirectToAction("Details", "Product", new { id = productId });
+            }
+
             return RedirectToAction("Checkout");
         }
-        private async Task<bool> ProcessAddToCart(int userId, int productId, int quantity, string size, string color)
+
+        // --- HÀM XỬ LÝ CHÍNH (ĐÃ SỬA LOGIC CHECK TỒN KHO) ---
+        private async Task<string> ProcessAddToCart(int userId, int productId, int quantity, string? size, string? color)
         {
             var product = await _context.Products.FindAsync(productId);
-            if (product == null) return false;
+            if (product == null) return "Sản phẩm không tồn tại.";
 
+            // 1. Tìm biến thể trong kho
+            var variant = await _context.ProductVariants.FirstOrDefaultAsync(v =>
+                v.ProductId == productId &&
+                (string.IsNullOrEmpty(size) ? (v.Size == null || v.Size == "") : v.Size == size) &&
+                (string.IsNullOrEmpty(color) ? (v.Color == null || v.Color == "") : v.Color == color)
+            );
+
+            if (variant == null) return "Phiên bản sản phẩm không hợp lệ.";
+
+            // 2. Tìm sản phẩm đã có trong giỏ hàng của user
             var cartItem = await _context.CartItems.FirstOrDefaultAsync(c =>
-                c.UserId == userId && c.ProductId == productId && c.Size == size && c.Color == color);
+                c.UserId == userId &&
+                c.ProductId == productId &&
+                (c.Size ?? "") == (size ?? "") &&
+                (c.Color ?? "") == (color ?? "")
+            );
 
+            // 3. LOGIC QUAN TRỌNG: Tính tổng số lượng (Trong giỏ + Muốn thêm)
+            int currentQtyInCart = cartItem?.Quantity ?? 0;
+            int totalRequested = currentQtyInCart + quantity;
+
+            // Kiểm tra so với tồn kho
+            if (totalRequested > variant.Quantity)
+            {
+                return $"Kho chỉ còn {variant.Quantity} sản phẩm. Bạn đã có {currentQtyInCart} trong giỏ hàng.";
+            }
+
+            // 4. Cập nhật hoặc Thêm mới
             if (cartItem != null)
             {
-                cartItem.Quantity += quantity;
+                cartItem.Quantity = totalRequested; // Cập nhật số lượng mới
                 _context.Update(cartItem);
             }
             else
             {
-                _context.CartItems.Add(new CartItem { UserId = userId, ProductId = productId, Quantity = quantity, Size = size, Color = color });
+                _context.CartItems.Add(new CartItem
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Size = size,
+                    Color = color
+                });
             }
+
             await _context.SaveChangesAsync();
-            return true;
+            return ""; // Trả về chuỗi rỗng nghĩa là Thành công
         }
-        // 2. QUẢN LÝ GIỎ HÀNG (CHECKOUT)
+
+        // 3. QUẢN LÝ GIỎ HÀNG (CHECKOUT)
         public async Task<IActionResult> Checkout()
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdStr, out int userId)) 
+            if (!int.TryParse(userIdStr, out int userId))
                 return RedirectToAction("Login", "Account");
-            // Lấy giỏ hàng
+
             var cartItems = await _context.CartItems
                 .Include(c => c.Product)
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
-            // LẤY THÔNG TIN USER ĐỂ ĐIỀN SẴN VÀO FORM
+
             var user = await _context.Users.FindAsync(userId);
-            ViewBag.UserInfo = user; // Truyền user qua ViewBag
+            ViewBag.UserInfo = user;
 
             return View(cartItems);
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int change)
         {
@@ -90,35 +147,21 @@ namespace WebBH.Controllers
 
             var variant = await _context.ProductVariants
                 .FirstOrDefaultAsync(v => v.ProductId == cartItem.ProductId
-                                       && v.Size == cartItem.Size
-                                       && v.Color == cartItem.Color);
+                                       && (v.Size ?? "") == (cartItem.Size ?? "")
+                                       && (v.Color ?? "") == (cartItem.Color ?? ""));
 
             int newQuantity = cartItem.Quantity + change;
 
-            // === 1. CHECK SỐ LƯỢNG TỐI THIỂU ===
             if (newQuantity < 1)
             {
-                return Json(new
-                {
-                    success = false,
-                    isMinError = true, // Cờ báo lỗi tối thiểu
-                    message = "Số lượng tối thiểu là 1 sản phẩm."
-                });
+                return Json(new { success = false, isMinError = true, message = "Số lượng tối thiểu là 1." });
             }
 
-            // === 2. CHECK TỒN KHO ===
             if (variant != null && newQuantity > variant.Quantity)
             {
-                return Json(new
-                {
-                    success = false,
-                    isStockError = true, // Cờ báo lỗi tồn kho
-                    maxStock = variant.Quantity,
-                    message = $"Chỉ còn {variant.Quantity} sản phẩm trong kho."
-                });
+                return Json(new { success = false, isStockError = true, maxStock = variant.Quantity, message = $"Chỉ còn {variant.Quantity} sản phẩm." });
             }
 
-            // Cập nhật hợp lệ
             cartItem.Quantity = newQuantity;
             _context.Update(cartItem);
             await _context.SaveChangesAsync();
@@ -133,6 +176,7 @@ namespace WebBH.Controllers
                 cartTotal = cartTotal.ToString("N0") + " đ"
             });
         }
+
         [HttpPost]
         public async Task<IActionResult> RemoveItem(int cartItemId)
         {
@@ -140,11 +184,14 @@ namespace WebBH.Controllers
             if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
             var cartItem = await _context.CartItems.FirstOrDefaultAsync(c => c.CartItemId == cartItemId && c.UserId == userId);
             if (cartItem != null) { _context.CartItems.Remove(cartItem); await _context.SaveChangesAsync(); }
+
             var cartTotal = await _context.CartItems.Where(c => c.UserId == userId).SumAsync(c => c.Quantity * c.Product.Price);
             var count = await _context.CartItems.Where(c => c.UserId == userId).SumAsync(c => c.Quantity);
+
             return Json(new { success = true, cartTotal = cartTotal.ToString("N0") + " đ", count });
         }
-        // 3. XÁC NHẬN ĐẶT HÀNG & THÀNH CÔNG
+
+        // 4. XÁC NHẬN ĐẶT HÀNG
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmOrder(string fullName, string phone, string address)
@@ -156,27 +203,26 @@ namespace WebBH.Controllers
                 .Include(c => c.Product)
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
+
             if (!cartItems.Any()) return RedirectToAction("Index", "Product");
-            // 1. KIỂM TRA VÀ TRỪ TỒN KHO
+
+            // Check lại tồn kho lần cuối trước khi tạo đơn
             foreach (var item in cartItems)
             {
-                // Tìm đúng biến thể (Size/Màu) trong kho
                 var variant = await _context.ProductVariants
                     .FirstOrDefaultAsync(v => v.ProductId == item.ProductId
-                                           && v.Size == item.Size
-                                           && v.Color == item.Color);
+                                           && (v.Size ?? "") == (item.Size ?? "")
+                                           && (v.Color ?? "") == (item.Color ?? ""));
 
-                // Nếu kho không có hoặc không đủ hàng
                 if (variant == null || variant.Quantity < item.Quantity)
                 {
-                    TempData["Error"] = $"Sản phẩm {item.Product.Name} ({item.Size}/{item.Color}) đã hết hàng hoặc không đủ số lượng!";
+                    TempData["Error"] = $"Sản phẩm {item.Product.Name} đã hết hàng hoặc không đủ số lượng!";
                     return RedirectToAction("Checkout");
                 }
-                // Trừ kho
-                variant.Quantity -= item.Quantity;
+                variant.Quantity -= item.Quantity; // Trừ kho
                 _context.Update(variant);
             }
-            // 2. TẠO ĐƠN HÀNG
+
             var order = new Order
             {
                 UserId = userId,
@@ -188,8 +234,8 @@ namespace WebBH.Controllers
                 ShippingAddress = address
             };
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync(); // Lưu đơn hàng và cập nhật kho
-            // 3. TẠO CHI TIẾT ĐƠN (LƯU SIZE/COLOR)
+            await _context.SaveChangesAsync();
+
             foreach (var item in cartItems)
             {
                 _context.OrderDetails.Add(new OrderDetail
@@ -207,12 +253,12 @@ namespace WebBH.Controllers
 
             return RedirectToAction("OrderSuccess", new { id = order.OrderId });
         }
+
         [HttpGet]
         public async Task<IActionResult> OrderSuccess(int id)
         {
             var order = await _context.Orders
-                .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
+                .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null) return RedirectToAction("Index", "Home");

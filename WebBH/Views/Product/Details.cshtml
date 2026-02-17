@@ -5,11 +5,17 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var variants = Model.ProductVariants;
-    var sizes = variants?.Select(v => v.Size).Distinct() ?? Enumerable.Empty<string>();
-    var colors = variants?.Select(v => v.Color).Distinct() ?? Enumerable.Empty<string>();
+    // LỌC BỎ GIÁ TRỊ RỖNG ĐỂ KHÔNG HIỆN NÚT TRẮNG
+    var sizes = variants?.Where(v => !string.IsNullOrEmpty(v.Size)).Select(v => v.Size).Distinct().ToList();
+    var colors = variants?.Where(v => !string.IsNullOrEmpty(v.Color)).Select(v => v.Color).Distinct().ToList();
 
-    // Serialize dữ liệu kho sang JSON
-    var variantsJson = JsonSerializer.Serialize(variants?.Select(v => new { v.Size, v.Color, v.Quantity }) ?? Enumerable.Empty<object>());
+    // Serialize dữ liệu kho sang JSON (Chuyển null thành chuỗi rỗng để JS dễ xử lý)
+    var variantsJson = JsonSerializer.Serialize(variants?.Select(v => new
+    {
+        Size = v.Size ?? "",
+        Color = v.Color ?? "",
+        Quantity = v.Quantity
+    }) ?? Enumerable.Empty<object>());
 }
 
 <link rel="stylesheet" href="~/css/product-selection.css" asp-append-version="true" />
@@ -21,7 +27,33 @@
         </div>
 
         <div class="col-md-5">
-            <h1 class="fw-bold mb-3">@Model.Name</h1>
+            <h1 class="fw-bold mb-2">@Model.Name</h1>
+
+            <div class="d-flex align-items-center mb-3">
+                <div class="text-warning me-2">
+                    @{
+                        double detailAvg = Model.Reviews != null && Model.Reviews.Any() ? (Model.Reviews.Average(r => r.Rating) ?? 0) : 0;
+                        double dRating = Math.Round(detailAvg * 2) / 2;
+                        int dFull = (int)dRating;
+                        bool dHalf = (dRating - dFull) >= 0.5;
+                        int dEmpty = 5 - dFull - (dHalf ? 1 : 0);
+                    }
+                    @for (int i = 0; i < dFull; i++)
+                    {
+                        <i class="bi bi-star-fill"></i>
+                    }
+                    @if (dHalf)
+                    {
+                        <i class="bi bi-star-half"></i>
+                    }
+                    @for (int i = 0; i < dEmpty; i++)
+                    {
+                        <i class="bi bi-star"></i>
+                    }
+                </div>
+                <span class="text-muted small">(@(Model.Reviews?.Count ?? 0) đánh giá)</span>
+            </div>
+
             <h3 class="text-primary fw-bold mb-4">@Model.Price.ToString("N0") đ</h3>
 
             <form id="cartForm" method="post">
@@ -30,27 +62,33 @@
                 <input type="number" name="quantity" value="1" min="1" class="d-none" />
                 <input type="hidden" id="variantsData" value='@Html.Raw(variantsJson)' />
 
-                <div class="mb-4">
-                    <label class="fw-bold small text-uppercase mb-2 d-block">Size</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach (var s in sizes)
-                        {
-                            <input type="radio" class="btn-check" name="size" id="s_@s" value="@s" required>
-                            <label class="btn btn-outline-dark px-4" for="s_@s">@s</label>
-                        }
+                @if (sizes != null && sizes.Any())
+                {
+                    <div class="mb-4">
+                        <label class="fw-bold small text-uppercase mb-2 d-block">Size</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var s in sizes)
+                            {
+                                <input type="radio" class="btn-check" name="size" id="s_@s" value="@s" required>
+                                <label class="btn btn-outline-dark px-4" for="s_@s">@s</label>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
 
-                <div class="mb-4">
-                    <label class="fw-bold small text-uppercase mb-2 d-block">Màu</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach (var c in colors)
-                        {
-                            <input type="radio" class="btn-check" name="color" id="c_@c" value="@c" required>
-                            <label class="btn btn-outline-dark px-3" for="c_@c">@c</label>
-                        }
+                @if (colors != null && colors.Any())
+                {
+                    <div class="mb-4">
+                        <label class="fw-bold small text-uppercase mb-2 d-block">Màu</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var c in colors)
+                            {
+                                <input type="radio" class="btn-check" name="color" id="c_@c" value="@c" required>
+                                <label class="btn btn-outline-dark px-3" for="c_@c">@c</label>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
 
                 <div id="stock-info" class="mb-3 small" style="min-height: 24px;"></div>
 
@@ -68,7 +106,6 @@
 
     <div class="mt-5 pt-5 border-top">
         <h3 class="fw-bold mb-4" style="font-family: serif;">ĐÁNH GIÁ TỪ KHÁCH HÀNG (@(Model.Reviews?.Count ?? 0))</h3>
-
         @if (Model.Reviews != null && Model.Reviews.Any())
         {
             <div class="row">
@@ -77,27 +114,22 @@
                     <div class="col-12 mb-4">
                         <div class="d-flex p-3 border rounded shadow-sm bg-white">
                             <div class="flex-shrink-0">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                                     style="width: 45px; height: 45px;">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 45px; height: 45px;">
                                     @(review.User?.FullName?.Substring(0, 1).ToUpper() ?? "U")
                                 </div>
                             </div>
-
                             <div class="flex-grow-1 ms-3">
                                 <div class="d-flex justify-content-between">
                                     <h6 class="mb-0 fw-bold">@review.User?.FullName</h6>
                                     <small class="text-muted">@review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</small>
                                 </div>
-
                                 <div class="text-warning my-1">
                                     @for (int i = 1; i <= 5; i++)
                                     {
                                         <i class="bi @(i <= review.Rating ? "bi-star-fill" : "bi-star")"></i>
                                     }
                                 </div>
-
                                 <p class="text-dark my-2">@review.Comment</p>
-
                                 @if (!string.IsNullOrEmpty(review.MediaUrl))
                                 {
                                     <div class="d-flex flex-wrap gap-2 mt-2">
@@ -109,8 +141,7 @@
                                             }
                                             else
                                             {
-                                                <img src="@media" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
-                                                     class="rounded border" onclick="window.open(this.src)">
+                                                <img src="@media" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" class="rounded border" onclick="window.open(this.src)">
                                             }
                                         }
                                     </div>

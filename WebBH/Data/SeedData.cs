@@ -8,8 +8,6 @@ namespace WebBH.Data
     {
         public static async Task InitializeAsync(WebThanhLyDbContext context)
         {
-            await context.Database.MigrateAsync();
-
             // 1. Đảm bảo có Roles trước
             if (!context.Roles.Any())
             {
