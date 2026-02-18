@@ -1,0 +1,60 @@
+﻿@model IEnumerable<WebBH.Models.FavoriteProduct>
+@{
+    ViewData["Title"] = "Sản phẩm yêu thích";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/profile.css">
+
+<div class="profile-container py-5">
+    <div class="container">
+        <div class="mb-5 border-bottom pb-4">
+            <h1 class="fw-bold" style="font-family: serif;">HỒ SƠ THÀNH VIÊN</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 mb-5">
+                <div class="profile-sidebar">
+                    <nav class="d-flex flex-column gap-2">
+                        <a href="/Account/Profile" class="profile-nav-link"><i class="bi bi-person"></i> Thông Tin Chung</a>
+                        <a href="/Order/Index" class="profile-nav-link"><i class="bi bi-bag"></i> Lịch Sử Đơn Hàng</a>
+                        <a href="/Favorite/Index" class="profile-nav-link active"><i class="bi bi-heart"></i> Sản Phẩm Yêu Thích</a>
+                        <a href="/Account/Logout" class="profile-nav-link text-danger mt-3"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <h4 class="fw-bold mb-4">Sản Phẩm Đã Lưu</h4>
+                @if (Model != null && Model.Any())
+                {
+                    <div class="row g-4">
+                        @foreach (var item in Model)
+                        {
+                            <div class="col-md-4 col-sm-6" id="fav-item-@item.ProductId">
+                                <div class="card h-100 border-0 shadow-sm position-relative">
+                                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle"
+                                            onclick="removeFavoriteItem(@item.ProductId)" style="z-index:10; width:30px; height:30px;">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    <img src="@(item.Product?.ImageUrl ?? "/images/default.jpg")" class="card-img-top object-fit-cover" style="height: 200px;">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold text-truncate">@item.Product?.Name</h6>
+                                        <p class="text-danger fw-bold">@item.Product?.Price.ToString("N0") đ</p>
+                                        <a href="/Product/Details/@item.ProductId" class="btn btn-dark btn-sm w-100">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 bg-light rounded">
+                        <p class="text-muted">Bạn chưa yêu thích sản phẩm nào.</p>
+                        <a href="/Product/Index" class="btn btn-outline-dark btn-sm">Đến cửa hàng</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -104,6 +104,25 @@
         </div>
     </div>
 
+    <div class="row mt-5 pt-4 border-top">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4" style="font-family: serif;">MÔ TẢ SẢN PHẨM</h3>
+            <div class="product-description text-muted lh-lg">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    @Html.Raw(Model.Description.Replace("\n", "<br/>"))
+                }
+                else
+                {
+                    <div class="py-4 px-3 bg-light rounded text-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span>Sản phẩm này hiện chưa có mô tả chi tiết.</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
     <div class="mt-5 pt-5 border-top">
         <h3 class="fw-bold mb-4" style="font-family: serif;">ĐÁNH GIÁ TỪ KHÁCH HÀNG (@(Model.Reviews?.Count ?? 0))</h3>
         @if (Model.Reviews != null && Model.Reviews.Any())

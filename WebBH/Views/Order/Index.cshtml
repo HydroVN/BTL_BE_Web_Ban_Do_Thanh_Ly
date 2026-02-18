@@ -2,7 +2,12 @@
 
 @{
     ViewData["Title"] = "Lịch Sử Đơn Hàng";
+    var userReviews = ViewBag.UserReviews as List<WebBH.Models.Review>;
+
+    // Lấy status từ URL, nếu không có thì là chuỗi rỗng
+    var currentStatus = (Context.Request.Query["status"].ToString() ?? "").ToLower();
 }
+
 <link rel="stylesheet" href="~/css/profile.css">
 <link rel="stylesheet" href="~/css/order-history.css">
 <link rel="stylesheet" href="~/css/review-modal.css" asp-append-version="true" />
@@ -17,16 +22,16 @@
             <div class="col-lg-3 mb-5">
                 <div class="profile-sidebar">
                     <nav class="d-flex flex-column gap-2">
-                        <a asp-controller="Account" asp-action="Profile" class="profile-nav-link">
+                        <a href="/Account/Profile" class="profile-nav-link">
                             <i class="bi bi-person"></i> Thông Tin Chung
                         </a>
-
-                        <a asp-controller="Order" asp-action="Index" class="profile-nav-link active">
+                        <a href="/Order/Index" class="profile-nav-link active">
                             <i class="bi bi-bag"></i> Lịch Sử Đơn Hàng
                         </a>
-
-                        <a href="#" class="profile-nav-link"><i class="bi bi-heart"></i> Sản Phẩm Yêu Thích</a>
-                        <a asp-controller="Account" asp-action="Logout" class="profile-nav-link text-danger mt-3">
+                        <a href="/Favorite/Index" class="profile-nav-link">
+                            <i class="bi bi-heart"></i> Sản Phẩm Yêu Thích
+                        </a>
+                        <a href="/Account/Logout" class="profile-nav-link text-danger mt-3">
                             <i class="bi bi-box-arrow-right"></i> Đăng Xuất
                         </a>
                     </nav>
@@ -46,29 +51,50 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
 
                 <nav class="nav nav-tabs-custom mb-4">
-                    <a class="nav-link active" href="#">Tất cả</a>
-                    <a class="nav-link" href="#">Chờ thanh toán</a>
-                    <a class="nav-link" href="#">Đang giao</a>
-                    <a class="nav-link" href="#">Hoàn thành</a>
+                    <a class="nav-link @(string.IsNullOrEmpty(currentStatus) ? "active" : "")"
+                       href="/Order/Index">
+                        Tất cả
+                    </a>
+
+                    <a class="nav-link @(currentStatus == "pending" ? "active" : "")"
+                       href="/Order/Index?status=pending">
+                        Chờ thanh toán
+                    </a>
+
+                    <a class="nav-link @(currentStatus == "shipping" ? "active" : "")"
+                       href="/Order/Index?status=shipping">
+                        Đang giao
+                    </a>
+
+                    <a class="nav-link @(currentStatus == "completed" ? "active" : "")"
+                       href="/Order/Index?status=completed">
+                        Hoàn thành
+                    </a>
                 </nav>
 
                 @if (Model != null && Model.Any())
                 {
                     @foreach (var order in Model)
                     {
-                        // Logic trạng thái
                         string statusClass = "bg-secondary";
                         string statusLabel = "Chờ xử lý";
 
+                        // Logic hiển thị label
                         if (order.Status == "Pending") { statusClass = "bg-warning text-dark"; statusLabel = "Chờ xác nhận"; }
                         else if (order.Status == "Packing") { statusClass = "bg-info text-white"; statusLabel = "Đang đóng gói"; }
                         else if (order.Status == "Shipping") { statusClass = "bg-primary text-white"; statusLabel = "Đang giao"; }
                         else if (order.Status == "Success" || order.Status == "Completed") { statusClass = "bg-success text-white"; statusLabel = "Hoàn thành"; }
                         else if (order.Status == "Cancelled") { statusClass = "bg-danger text-white"; statusLabel = "Đã hủy"; }
 
-                        // Lấy thông tin sản phẩm đầu tiên để dùng cho Modal Xác Nhận
                         var firstItem = order.OrderDetails.FirstOrDefault();
                         var fName = firstItem?.Product?.Name ?? "Sản phẩm";
                         var fImg = firstItem?.Product?.ImageUrl ?? "/images/default.jpg";
@@ -106,10 +132,32 @@
 
                                             @if (order.Status == "Success" || order.Status == "Completed")
                                             {
-                                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold"
-                                                        onclick="openRateModal('@item.ProductId', '@order.OrderId', '@item.Product?.Name', '@item.Product?.ImageUrl')">
-                                                    <i class="bi bi-star-fill me-1"></i> Đánh giá
-                                                </button>
+                                                var existingReview = userReviews?.FirstOrDefault(r => r.OrderId == order.OrderId && r.ProductId == item.ProductId);
+
+                                                if (existingReview == null)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold btn-open-rate"
+                                                            data-pid="@item.ProductId"
+                                                            data-oid="@order.OrderId"
+                                                            data-name="@item.Product?.Name"
+                                                            data-img="@item.Product?.ImageUrl"
+                                                            data-rating="0">
+                                                        <i class="bi bi-star me-1"></i> Đánh giá
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-warning rounded-pill fw-bold text-dark btn-open-rate"
+                                                            data-pid="@item.ProductId"
+                                                            data-oid="@order.OrderId"
+                                                            data-name="@item.Product?.Name"
+                                                            data-img="@item.Product?.ImageUrl"
+                                                            data-rating="@existingReview.Rating"
+                                                            data-comment="@existingReview.Comment"
+                                                            data-media="@existingReview.MediaUrl">
+                                                        <i class="bi bi-eye-fill me-1"></i> Xem đánh giá
+                                                    </button>
+                                                }
                                             }
                                         </div>
                                     </div>
@@ -122,11 +170,10 @@
                                     <div class="total-value fw-bold fs-5 text-danger">@((order.TotalAmount ?? 0).ToString("N0"))₫</div>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-dark px-3">
+                                    <a href="/Order/Details/@order.OrderId" class="btn btn-sm btn-dark px-3">
                                         Xem chi tiết
                                     </a>
 
-                                    @* Nút Hủy *@
                                     @if (order.Status == "Pending" || order.Status == "Packing")
                                     {
                                         <button type="button" class="btn btn-sm btn-outline-danger px-3"
@@ -135,8 +182,6 @@
                                             Hủy Đơn
                                         </button>
                                     }
-
-                                    @* Nút Đã nhận hàng (Gọi Modal xác nhận) *@
                                     @if (order.Status == "Shipping")
                                     {
                                         <button type="button" class="btn btn-sm btn-success px-3 fw-bold"
@@ -153,8 +198,8 @@
                 {
                     <div class="text-center py-5 border rounded bg-white">
                         <i class="bi bi-box-seam fs-1 text-muted mb-3"></i>
-                        <h4 class="text-muted">Bạn chưa có đơn hàng nào.</h4>
-                        <a asp-controller="Product" asp-action="Index" class="btn btn-dark mt-3 px-4">Mua sắm ngay</a>
+                        <h4 class="text-muted">Không tìm thấy đơn hàng nào.</h4>
+                        <a href="/Product/Index" class="btn btn-dark mt-3 px-4">Mua sắm ngay</a>
                     </div>
                 }
             </div>
@@ -169,12 +214,12 @@
                 <h5 class="modal-title fw-bold text-danger">Xác nhận hủy đơn hàng</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-action="CancelOrder" method="post">
+            <form action="/Order/CancelOrder" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="orderId" id="cancelOrderId" />
-                    <p class="mb-3">Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.</p>
-                    <textarea name="reason" class="form-control" rows="2" placeholder="Lý do hủy (không bắt buộc)..."></textarea>
+                    <p class="mb-3">Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+                    <textarea name="reason" class="form-control" rows="2" placeholder="Lý do hủy..."></textarea>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
@@ -191,37 +236,24 @@
             <div class="modal-header border-0 pb-0 justify-content-center">
                 <h4 class="fw-bold mt-3" style="font-family: serif; font-size: 24px;">Xác nhận đã nhận hàng?</h4>
             </div>
-
             <div class="modal-body p-4">
                 <div class="d-flex align-items-center p-3 mb-4" style="background: #f8f9fa; border-radius: 15px; border: 1px solid #eee;">
-                    <img id="conf-img" src="" class="rounded-3 me-3" style="width: 70px; height: 70px; object-fit: cover; border: 1px solid #ddd;">
+                    <img id="conf-img" src="" class="rounded-3 me-3" style="width: 70px; height: 70px; object-fit: cover;">
                     <div class="flex-grow-1">
                         <div id="conf-name" class="fw-bold text-dark text-truncate" style="max-width: 250px;">Tên sản phẩm</div>
-                        <div id="conf-meta" class="small text-muted">Size: ... | Màu: ...</div>
+                        <div id="conf-meta" class="small text-muted"></div>
                         <div id="conf-price" class="fw-bold text-danger">0 đ</div>
                     </div>
                 </div>
-
-                <div class="alert alert-warning border-0 small mb-4" style="background-color: #fff8f0; color: #856404; border-radius: 12px; line-height: 1.6;">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>Lưu ý:</strong> Sau khi xác nhận, số tiền sẽ được chuyển cho người bán. Bạn sẽ không thể yêu cầu trả hàng/hoàn tiền sau hành động này.
+                <div class="alert alert-warning border-0 small mb-4">
+                    <strong>Lưu ý:</strong> Tiền sẽ được chuyển cho người bán. Không thể hoàn tác.
                 </div>
-
-                <form asp-action="ConfirmReceived" method="post">
+                <form action="/Order/ConfirmReceived" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="orderId" id="conf-orderId" />
-
-                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold mb-2" style="border-radius: 12px; font-size: 16px;">
-                        XÁC NHẬN NHẬN HÀNG
-                    </button>
-                    <button type="button" class="btn btn-link w-100 text-decoration-none text-muted fw-bold" data-bs-dismiss="modal">
-                        Quay lại
-                    </button>
+                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold mb-2" style="border-radius: 12px;">XÁC NHẬN NHẬN HÀNG</button>
+                    <button type="button" class="btn btn-link w-100 text-decoration-none text-muted fw-bold" data-bs-dismiss="modal">Quay lại</button>
                 </form>
-
-                <div class="text-center mt-3 pt-3 border-top" style="font-size: 10px; color: #ccc; letter-spacing: 1px;">
-                    <i class="bi bi-shield-lock-fill me-1"></i> CURATED SECURITY GUARANTEED
-                </div>
             </div>
         </div>
     </div>
@@ -234,19 +266,18 @@
             <input type="hidden" name="orderId" id="rmOrder">
             <input type="hidden" name="rating" id="rmRating" value="0">
 
-            <div class="rm-title">Rate your purchase</div>
+            <div class="rm-title">Đánh giá sản phẩm</div>
             <div class="rm-subtitle">Đơn hàng #<span id="rmOrderIdDisplay"></span></div>
 
             <div class="rm-product-preview">
                 <img id="rmImg" src="" class="rm-prod-img" alt="Product">
                 <div>
-                    <div style="font-weight:bold; color:#fff" id="rmName">Product Name</div>
-                    <div style="font-size:12px; color:#10b981; letter-spacing: 0.5px;">VERIFIED PURCHASE</div>
+                    <div style="font-weight:bold;" id="rmName">Tên sản phẩm</div>
+                    <div style="font-size:12px; color:#10b981;">ĐÃ MUA HÀNG</div>
                 </div>
             </div>
 
-            <p style="font-size:14px; margin-bottom: 8px;">How would you rate this item?</p>
-
+            <p style="font-size:14px; margin-bottom: 8px;">Chất lượng sản phẩm thế nào?</p>
             <div class="rm-stars">
                 <i class="bi bi-star-fill rm-star" data-val="1"></i>
                 <i class="bi bi-star-fill rm-star" data-val="2"></i>
@@ -256,28 +287,28 @@
             </div>
             <div class="rm-rating-text" id="rmRatingText"></div>
 
-            <p style="font-size:14px; margin-top:15px; margin-bottom: 5px;">Personal Feedback</p>
-            <textarea name="comment" class="rm-textarea" rows="2" placeholder="Tell us about the condition, fit, and styling details..."></textarea>
+            <p style="font-size:14px; margin-top:15px; margin-bottom: 5px;">Nhận xét của bạn</p>
+            <textarea name="comment" class="rm-textarea" rows="3" placeholder="Chia sẻ cảm nhận về sản phẩm..."></textarea>
 
-            <p style="font-size:12px; color:#9ca3af; margin-bottom: 5px;">Upload Photos/Videos (Max 5 files)</p>
+            <p style="font-size:12px; color:#9ca3af; margin-bottom: 5px;">Hình ảnh/Video thực tế</p>
+
             <div class="rm-upload-area" onclick="document.getElementById('rmFile').click()">
                 <div class="rm-plus-btn">+</div>
-                <div style="color:#10b981; font-weight:bold; font-size:14px">Click to upload</div>
-                <div style="font-size:11px; color:#6b7280">Show off your style</div>
+                <div style="color:#10b981; font-weight:bold; font-size:14px">Thêm hình ảnh</div>
                 <input type="file" id="rmFile" name="mediaFiles" multiple accept="image/*,video/*" style="display:none">
-                <div class="rm-preview-list" id="rmPreview"></div>
             </div>
 
-            <button type="button" class="rm-cancel-btn" onclick="closeRateModal()">Cancel</button>
-            <button type="button" class="rm-submit-btn" onclick="submitReview()">
-                Submit Review <i class="bi bi-arrow-right"></i>
-            </button>
+            <div class="rm-preview-list mt-2" id="rmPreview" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+
+            <div class="mt-3 d-flex justify-content-end gap-2">
+                <button type="button" class="rm-cancel-btn" onclick="closeRateModal()">Đóng</button>
+                <button type="button" class="rm-submit-btn" onclick="submitReview()">Gửi đánh giá</button>
+            </div>
         </form>
     </div>
 </div>
 
 @section Scripts {
     <script src="~/js/order-actions.js" asp-append-version="true"></script>
-
     <script src="~/js/order-review.js" asp-append-version="true"></script>
 }

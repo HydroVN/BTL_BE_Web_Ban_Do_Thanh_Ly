@@ -14,14 +14,21 @@
             <div class="col-lg-3 mb-5">
                 <div class="profile-sidebar">
                     <nav class="d-flex flex-column gap-2">
-                        <a href="#" class="profile-nav-link active"><i class="bi bi-person"></i> Thông Tin Chung</a>
+                        <a href="/Account/Profile" class="profile-nav-link active">
+                            <i class="bi bi-person"></i> Thông Tin Chung
+                        </a>
 
-                        <a asp-controller="Order" asp-action="Index" class="profile-nav-link">
+                        <a href="/Order/Index" class="profile-nav-link">
                             <i class="bi bi-bag"></i> Lịch Sử Đơn Hàng
                         </a>
 
-                        <a href="#" class="profile-nav-link"><i class="bi bi-heart"></i> Sản Phẩm Yêu Thích</a>
-                        <a asp-controller="Account" asp-action="Logout" class="profile-nav-link text-danger mt-3"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+                        <a href="/Favorite/Index" class="profile-nav-link">
+                            <i class="bi bi-heart"></i> Sản Phẩm Yêu Thích
+                        </a>
+
+                        <a href="/Account/Logout" class="profile-nav-link text-danger mt-3">
+                            <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+                        </a>
                     </nav>
                 </div>
             </div>
@@ -29,55 +36,75 @@
             <div class="col-lg-9">
                 @if (TempData["SuccessMessage"] != null)
                 {
-                    <div class="alert alert-success border-0 bg-success text-white mb-4">
+                    <div class="alert alert-success border-0 bg-success text-white mb-4 shadow-sm">
                         <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
                     </div>
                 }
 
-                <div class="profile-header">
-                    <div class="avatar-circle">
-                        @Model.FullName?.Substring(0, 1).ToUpper()
-                        <i class="bi bi-patch-check-fill verified-icon"></i>
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger border-0 bg-danger text-white mb-4 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="profile-header d-flex align-items-center gap-4 mb-5 p-4 bg-light rounded-3 shadow-sm">
+                    <div class="avatar-circle" style="width: 80px; height: 80px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; position: relative;">
+                        @(!string.IsNullOrEmpty(Model.FullName) ? Model.FullName.Substring(0, 1).ToUpper() : "U")
+                        <i class="bi bi-patch-check-fill verified-icon" style="position: absolute; bottom: 0; right: 0; color: #198754; font-size: 1.2rem; background: #fff; border-radius: 50%;"></i>
                     </div>
                     <div>
                         <h2 class="fw-bold mb-1" style="font-family: serif;">@Model.FullName</h2>
 
                         <div class="text-success small fw-bold text-uppercase ls-1">
-                            @(User.IsInRole("Admin") ? "Chủ Shop" : "Thành Viên Chính Thức")
+                            @(User.IsInRole("Admin") ? "Quản Trị Viên" : "Thành Viên Chính Thức")
                         </div>
 
                         <div class="text-muted small">@Model.Email</div>
                     </div>
                 </div>
 
-                <h4 class="mb-4 font-serif">Chi Tiết Tài Khoản</h4>
+                <h4 class="mb-4 font-serif fw-bold">Chi Tiết Tài Khoản</h4>
 
-                <form asp-action="UpdateProfile" method="post">
+                <form action="/Account/UpdateProfile" method="post">
+                    @Html.AntiForgeryToken()
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <label class="profile-label">Họ và Tên</label>
-                            <input asp-for="FullName" class="profile-input" placeholder="Nhập họ tên của bạn">
-                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                            <label class="profile-label fw-bold small text-muted text-uppercase mb-2 d-block">Họ và Tên</label>
+                            <input type="text" name="FullName" class="form-control profile-input py-2"
+                                   value="@Model.FullName" placeholder="Nhập họ tên của bạn">
+                            <span class="text-danger small">@Html.ValidationMessageFor(m => m.FullName)</span>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="profile-label">Địa Chỉ Email</label>
-                            <input asp-for="Email" class="profile-input" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                            <label class="profile-label fw-bold small text-muted text-uppercase mb-2 d-block">Địa Chỉ Email</label>
+                            <input type="email" name="Email" class="form-control profile-input py-2"
+                                   value="@Model.Email" readonly style="background-color: #f8f9fa; cursor: not-allowed; border-color: #eee;">
+                            <p class="text-muted style" style="font-size: 0.7rem; margin-top: 5px;">* Email không thể thay đổi để đảm bảo bảo mật.</p>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="profile-label">Số Điện Thoại</label>
-                            <input asp-for="PhoneNumber" class="profile-input" placeholder="09xxxxxxxx">
-                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            <label class="profile-label fw-bold small text-muted text-uppercase mb-2 d-block">Số Điện Thoại</label>
+                            <input type="text" name="PhoneNumber" class="form-control profile-input py-2"
+                                   value="@Model.PhoneNumber" placeholder="09xxxxxxxx">
+                            <span class="text-danger small">@Html.ValidationMessageFor(m => m.PhoneNumber)</span>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-3 align-items-center mt-4">
-                        <a asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none small text-uppercase fw-bold">Quay lại</a>
-                        <button type="submit" class="btn-save-profile">Lưu Thay Đổi</button>
+                    <div class="d-flex justify-content-end gap-3 align-items-center mt-4 pt-3 border-top">
+                        <a href="/" class="text-muted text-decoration-none small text-uppercase fw-bold">Quay lại trang chủ</a>
+                        <button type="submit" class="btn btn-dark px-5 py-2 fw-bold text-uppercase" style="border-radius: 0; letter-spacing: 1px;">
+                            Lưu Thay Đổi
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

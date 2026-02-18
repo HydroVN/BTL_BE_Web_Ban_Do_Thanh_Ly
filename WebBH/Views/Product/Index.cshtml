@@ -3,30 +3,29 @@
 @{
     ViewData["Title"] = "Cửa Hàng";
     var categories = ViewBag.Categories as List<WebBH.Models.Category>;
-
-    // Lấy các tham số từ URL để giữ trạng thái
     var currentSort = ViewBag.CurrentSort as string;
     var currentCat = ViewBag.CurrentCategory as int?;
+
+    // Lấy danh sách ID đã thích từ ViewBag (đã được xử lý ở Controller)
+    var likedIds = ViewBag.LikedProductIds as List<int> ?? new List<int>();
 }
 
 <link rel="stylesheet" href="~/css/shop.css">
+<link rel="stylesheet" href="~/css/favorite.css" asp-append-version="true">
 
 <div class="container-fluid pt-4 pb-5 px-lg-5">
-
     <div class="row mb-5 align-items-end">
         <div class="col-md-8">
             <span class="text-success text-uppercase fw-bold small ls-1">Bộ Sưu Tập / Mùa Xuân 2026</span>
             <h1 class="display-4 fw-bold mt-2 text-uppercase" style="letter-spacing: -1px;">Phong Cách Tối Giản</h1>
             <p class="text-muted w-75">Các món đồ tuyển chọn từ những nhà sưu tập hàng đầu thế giới.</p>
         </div>
-
         <div class="col-md-4 text-md-end">
-            <form method="get" action="@Url.Action("Index", "Product")" class="d-inline-flex align-items-center gap-3">
+            <form method="get" action="/Product/Index" class="d-inline-flex align-items-center gap-3">
                 @if (currentCat != null)
                 {
                     <input type="hidden" name="categoryId" value="@currentCat" />
                 }
-
                 <span class="small text-muted">Sắp xếp theo:</span>
                 <select name="sortOrder" class="form-select border-0 bg-light w-auto fw-bold" style="min-width: 150px;" onchange="this.form.submit()">
                     <option value="">Hàng Mới Về</option>
@@ -41,25 +40,20 @@
         <div class="col-lg-2 pe-lg-5 d-none d-lg-block">
             <div class="mb-5">
                 <h6 class="fw-bold mb-4 text-uppercase small ls-1">DANH MỤC</h6>
-
                 <div class="mb-2">
-                    <a href="@Url.Action("Index", "Product", new { sortOrder = currentSort })"
+                    <a href="/Product/Index?sortOrder=@currentSort"
                        class="text-decoration-none d-flex align-items-center @(currentCat == null ? "text-dark fw-bold" : "text-muted")">
-                        <i class="bi @(currentCat == null ? "bi-check-square-fill" : "bi-square") me-2"></i>
-                        Tất cả sản phẩm
+                        <i class="bi @(currentCat == null ? "bi-check-square-fill" : "bi-square") me-2"></i> Tất cả sản phẩm
                     </a>
                 </div>
-
                 @if (categories != null)
                 {
                     foreach (var cat in categories)
                     {
                         <div class="mb-2">
-                            <a href="@Url.Action("Index", "Product", new { categoryId = cat.CategoryId, sortOrder = currentSort })"
+                            <a href="/Product/Index?categoryId=@cat.CategoryId&sortOrder=@currentSort"
                                class="text-decoration-none d-flex align-items-center @(currentCat == cat.CategoryId ? "text-dark fw-bold" : "text-muted")">
-
-                                <i class="bi @(currentCat == cat.CategoryId ? "bi-check-square-fill" : "bi-square") me-2"></i>
-                                @cat.Name
+                                <i class="bi @(currentCat == cat.CategoryId ? "bi-check-square-fill" : "bi-square") me-2"></i> @cat.Name
                             </a>
                         </div>
                     }
@@ -74,14 +68,24 @@
                     @foreach (var item in Model)
                     {
                         int totalStock = item.ProductVariants?.Sum(v => v.Quantity) ?? 0;
+                        // Kiểm tra xem sản phẩm này đã có trong Wishlist chưa
+                        bool isLiked = likedIds.Contains(item.ProductId);
 
                         <div class="col-md-4 col-sm-6">
                             <div class="product-card h-100 position-relative">
-                                <a href="@Url.Action("Details", "Product", new { id = item.ProductId })" class="text-decoration-none text-dark">
+
+                                <button class="btn-favorite position-absolute top-0 end-0 m-2 shadow-sm"
+                                        onclick="toggleFavorite(this, @item.ProductId)"
+                                        title="Yêu thích"
+                                        style="z-index: 10;">
+                                    <i class="bi @(isLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
+                                </button>
+
+                                <a href="/Product/Details/@item.ProductId" class="text-decoration-none text-dark">
                                     <div class="product-img-wrap mb-3 position-relative overflow-hidden rounded">
                                         @if (totalStock == 0)
                                         {
-                                            <span class="position-absolute top-0 end-0 bg-secondary text-white px-2 py-1 m-2 small fw-bold z-2">HẾT HÀNG</span>
+                                            <span class="position-absolute top-0 start-0 bg-secondary text-white px-2 py-1 m-2 small fw-bold z-2">HẾT HÀNG</span>
                                         }
                                         <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://dummyimage.com/600x600/eee/aaa" : item.ImageUrl)"
                                              class="img-fluid w-100 object-fit-cover"
@@ -102,11 +106,7 @@
                                         <div class="d-flex align-items-center mt-2">
                                             <div class="text-warning small me-2" style="font-size: 0.8rem;">
                                                 @{
-                                                    // SỬA LỖI TẠI ĐÂY: Thêm '?? 0' vào sau hàm Average(...)
-                                                    double avgRating = item.Reviews != null && item.Reviews.Any()
-                                                    ? (item.Reviews.Average(r => r.Rating) ?? 0)
-                                                    : 0;
-
+                                                    double avgRating = item.Reviews != null && item.Reviews.Any() ? (item.Reviews.Average(r => r.Rating) ?? 0) : 0;
                                                     double rating = Math.Round(avgRating * 2) / 2;
                                                     int fullStars = (int)rating;
                                                     bool hasHalfStar = (rating - fullStars) >= 0.5;
@@ -136,11 +136,16 @@
                 else
                 {
                     <div class="col-12 text-center py-5">
+                        <i class="bi bi-search fs-1 text-muted mb-3"></i>
                         <h4 class="text-muted">Không tìm thấy sản phẩm nào.</h4>
-                        <a href="@Url.Action("Index", "Product")" class="btn btn-outline-dark mt-3">Xóa bộ lọc</a>
+                        <a href="/Product/Index" class="btn btn-outline-dark mt-3 px-4">Xóa bộ lọc</a>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/favorite.js" asp-append-version="true"></script>
+}

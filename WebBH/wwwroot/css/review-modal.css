@@ -169,3 +169,26 @@
     float: left;
     margin-top: 28px;
 }
+.rm-textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    color: #000 !important; /* <--- QUAN TRỌNG: Màu chữ đen */
+    background-color: #fff;
+}
+
+    .rm-textarea:focus {
+        border-color: #000;
+    }
+
+    /* Khi ở chế độ xem lại (Read-only) */
+    .rm-textarea[readonly] {
+        background-color: #e9ecef !important; /* Màu nền xám đậm hơn chút */
+        color: #212529 !important; /* Màu chữ đen đậm */
+        cursor: default;
+        font-weight: 500;
+    }

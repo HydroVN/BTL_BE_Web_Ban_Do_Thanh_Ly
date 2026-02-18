@@ -20,6 +20,8 @@ public partial class WebThanhLyDbContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<FavoriteProduct> FavoriteProducts { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
@@ -33,7 +35,6 @@ public partial class WebThanhLyDbContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CartItem>(entity =>
@@ -52,6 +53,17 @@ public partial class WebThanhLyDbContext : DbContext
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B1D562892");
+        });
+
+        modelBuilder.Entity<FavoriteProduct>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Favorite__3214EC0709E832D5");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.FavoriteProducts).HasConstraintName("FK_Favorite_Product");
+
+            entity.HasOne(d => d.User).WithMany(p => p.FavoriteProducts).HasConstraintName("FK_Favorite_User");
         });
 
         modelBuilder.Entity<Order>(entity =>

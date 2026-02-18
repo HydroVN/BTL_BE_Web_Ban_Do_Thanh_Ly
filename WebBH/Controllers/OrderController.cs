@@ -17,17 +17,46 @@ namespace WebBH.Controllers
             _context = context;
         }
 
-        // 1. DANH SÁCH ĐƠN HÀNG (LỊCH SỬ)
-        public async Task<IActionResult> Index()
+        // 1. DANH SÁCH ĐƠN HÀNG (Có lọc theo status)
+        public async Task<IActionResult> Index(string status)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return RedirectToAction("Login", "Account");
 
-            var orders = await _context.Orders
+            // Tạo câu truy vấn cơ bản
+            var query = _context.Orders
                 .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
-                .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+                .Where(o => o.UserId == userId);
+
+            // Xử lý lọc theo trạng thái
+            if (!string.IsNullOrEmpty(status))
+            {
+                switch (status.ToLower())
+                {
+                    case "pending": // Tab: Chờ thanh toán
+                        query = query.Where(o => o.Status == "Pending" || o.Status == "Packing");
+                        break;
+                    case "shipping": // Tab: Đang giao
+                        query = query.Where(o => o.Status == "Shipping");
+                        break;
+                    case "completed": // Tab: Hoàn thành
+                        query = query.Where(o => o.Status == "Success" || o.Status == "Completed");
+                        break;
+                    case "cancelled": // Tab: Đã hủy
+                        query = query.Where(o => o.Status == "Cancelled");
+                        break;
+                }
+            }
+
+            // Sắp xếp giảm dần theo ngày
+            var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            // Lấy danh sách đánh giá để hiển thị nút "Đánh giá" hoặc "Xem đánh giá"
+            var reviews = await _context.Reviews.Where(r => r.UserId == userId).ToListAsync();
+            ViewBag.UserReviews = reviews;
+
+            // Truyền trạng thái hiện tại sang View để tô màu nút đang chọn
+            ViewBag.CurrentStatus = status;
 
             return View(orders);
         }
@@ -48,39 +77,39 @@ namespace WebBH.Controllers
             return View(order);
         }
 
-        // 3. XỬ LÝ: HỦY ĐƠN HÀNG
+        // 3. HỦY ĐƠN HÀNG (Có hoàn kho)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelOrder(int orderId, string reason)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return RedirectToAction("Login", "Account");
+
             var order = await _context.Orders
-                .Include(o => o.OrderDetails) // Lấy chi tiết đơn
+                .Include(o => o.OrderDetails)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.UserId == userId);
+
             if (order == null) return NotFound();
+
             if (order.Status == "Pending" || order.Status == "Packing")
             {
-                // === LOGIC HOÀN KHO CHÍNH XÁC ===
+                // Hoàn lại số lượng tồn kho
                 foreach (var detail in order.OrderDetails)
                 {
-                    // Tìm đúng biến thể dựa trên Size và Color đã lưu
                     var variant = await _context.ProductVariants
-                        .FirstOrDefaultAsync(v => v.ProductId == detail.ProductId
-                                               && v.Size == detail.Size
-                                               && v.Color == detail.Color);
+                        .FirstOrDefaultAsync(v => v.ProductId == detail.ProductId && v.Size == detail.Size && v.Color == detail.Color);
 
                     if (variant != null)
                     {
-                        variant.Quantity += detail.Quantity; // Cộng lại số lượng
+                        variant.Quantity += detail.Quantity;
                         _context.Update(variant);
                     }
                 }
-                // =================================
+
                 order.Status = "Cancelled";
                 _context.Update(order);
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "Đã hủy đơn hàng và hoàn tiền vào kho thành công.";
+                TempData["Message"] = "Đã hủy đơn hàng thành công.";
             }
             else
             {
@@ -89,7 +118,7 @@ namespace WebBH.Controllers
             return RedirectToAction("Index");
         }
 
-        // 4. XỬ LÝ: ĐÃ NHẬN ĐƯỢC HÀNG
+        // 4. XÁC NHẬN ĐÃ NHẬN HÀNG
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmReceived(int orderId)
@@ -99,22 +128,19 @@ namespace WebBH.Controllers
 
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId && o.UserId == userId);
 
-            if (order == null) return NotFound();
-
-            // Logic: Chỉ cho xác nhận khi đang giao hàng (Shipping)
-            if (order.Status == "Shipping")
+            if (order != null && order.Status == "Shipping")
             {
-                order.Status = "Success"; // Chuyển thành Hoàn thành (Success hoặc Completed tùy bạn)
+                order.Status = "Completed"; // Hoặc "Success" tùy database của bạn
                 _context.Update(order);
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "Cảm ơn bạn đã mua hàng!";
+                TempData["Message"] = "Đã xác nhận nhận hàng thành công!";
             }
             else
             {
-                TempData["Error"] = "Trạng thái đơn hàng không hợp lệ để xác nhận.";
+                TempData["Error"] = "Trạng thái đơn hàng không hợp lệ.";
             }
 
-            return RedirectToAction("Index"); // Quay về danh sách thay vì chi tiết
+            return RedirectToAction("Index");
         }
     }
 }
