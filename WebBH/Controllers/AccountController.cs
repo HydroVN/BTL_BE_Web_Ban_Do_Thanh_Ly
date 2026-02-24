@@ -68,6 +68,30 @@ namespace WebBH.Controllers
                 return View();
             }
 
+            // KIỂM TRA TÀI KHOẢN BỊ KHÓA & TỰ ĐỘNG UNBAN
+            if (user.IsBanned)
+            {
+                if (user.BannedUntil.HasValue && user.BannedUntil.Value <= DateTime.Now)
+                {
+                    // Đã hết hạn -> Gỡ phạt
+                    user.IsBanned = false;
+                    user.BanReason = null;
+                    user.BannedUntil = null;
+
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // Đang bị phạt -> Chuyển hướng báo lỗi KÈM THỜI GIAN
+                    return RedirectToAction("AccountRestricted", "Account", new
+                    {
+                        reason = user.BanReason,
+                        until = user.BannedUntil?.ToString("dd/MM/yyyy HH:mm")
+                    });
+                }
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.FullName ?? user.Email),
@@ -83,13 +107,22 @@ namespace WebBH.Controllers
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties { IsPersistent = true });
 
-            // SỬA TẠI ĐÂY: Dùng Equals để tránh lỗi phân biệt hoa thường
             if (string.Equals(user.Role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        // TRANG HIỂN THỊ THÔNG BÁO LỖI KHI BỊ KHÓA NHẬN THÊM THAM SỐ `until`
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AccountRestricted(string reason, string until)
+        {
+            ViewBag.Reason = reason ?? "Vi phạm chính sách và tiêu chuẩn cộng đồng của hệ thống.";
+            ViewBag.BannedUntil = until;
+            return View();
         }
 
         [HttpGet]
@@ -165,8 +198,6 @@ namespace WebBH.Controllers
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.Name),
-    
-                // THÊM DÒNG NÀY: Phải giữ lại ID khi cập nhật hồ sơ, nếu không sẽ bị lỗi giỏ hàng
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
             };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
