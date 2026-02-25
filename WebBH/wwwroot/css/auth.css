@@ -1,3 +1,7 @@
+/* ==========================================================================
+   CSS CHO TRANG ĐĂNG NHẬP / ĐĂNG KÝ (AUTH)
+   ========================================================================== */
+
 .auth-container {
 	height: 100vh;
 	width: 100vw;
@@ -6,7 +10,6 @@
 
 .auth-brand {
 	width: 50%;
-	background: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop') center/cover;
 	position: relative;
 }
 
@@ -54,29 +57,43 @@
 	overflow: hidden;
 }
 
-/* Cột hình ảnh (Bên trái) */
+/* ===================================================
+   CỘT HÌNH ẢNH (BÊN TRÁI) - ĐÃ CẬP NHẬT DÙNG THẺ IMG
+   =================================================== */
 .auth-visual {
-	background-color: #050505; /* Màu nền đen như hình */
-	background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=2080&auto=format&fit=crop');
-	background-size: cover;
-	background-position: center;
+	background-color: #050505; /* Màu nền đen hiển thị ở các rìa trống */
 	position: relative;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
 }
 
-	/* Lớp phủ đen mờ để chữ trắng nổi bật hơn */
-	.auth-visual::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9));
-	}
+/* Thuộc tính cho thẻ ảnh <img> nằm dưới cùng */
+.auth-bg-img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain; /* Thu nhỏ ảnh vừa vặn khung (không bị cắt xén) */
+	z-index: 0;
+}
+
+/* Lớp phủ đen mờ để chữ trắng nổi bật hơn (nằm đè lên ảnh) */
+.auth-visual::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9));
+	z-index: 1;
+}
 
 .visual-content {
 	position: relative;
-	z-index: 2;
+	z-index: 2; /* Nổi lên trên cùng (trên lớp mờ và ảnh) */
 	padding: 4rem;
 }
 
@@ -87,7 +104,9 @@
 	margin-bottom: 2rem;
 }
 
-/* Cột Form (Bên phải) */
+/* ===================================================
+   CỘT FORM (BÊN PHẢI)
+   =================================================== */
 .auth-form-container {
 	background-color: #fff;
 	display: flex;
@@ -130,7 +149,7 @@
 
 	.custom-input:focus {
 		outline: none;
-		border-bottom-color: #000; /* Đổi màu gạch chân khi click vào */
+		border-bottom-color: #000;
 		box-shadow: none;
 	}
 
@@ -163,11 +182,11 @@
 }
 
 @media (max-width: 992px) {
-	.auth-brand {
-		display: none;
+	.auth-visual {
+		display: none !important;
 	}
 
-	.auth-form-side {
+	.auth-form-container {
 		width: 100%;
 	}
 }
@@ -190,13 +209,12 @@
 	align-items: center;
 	gap: 10px;
 	margin-bottom: 5px;
-	color: #dc3545; /* Màu đỏ mặc định */
+	color: #dc3545;
 	transition: color 0.3s;
 }
 
-	/* Khi đạt yêu cầu (JS thêm class .valid) */
 	.requirement-item.valid {
-		color: #198754; /* Màu xanh lá */
+		color: #198754;
 		font-weight: 500;
 	}
 
@@ -232,7 +250,6 @@
 	}
 }
 
-/* Thông báo khớp mật khẩu */
 #match-message {
 	font-size: 1.2rem;
 	transition: all 0.2s;

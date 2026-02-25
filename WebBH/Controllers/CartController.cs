@@ -7,7 +7,7 @@ using WebBH.Models;
 
 namespace WebBH.Controllers
 {
-    [Authorize]
+    // BỎ [Authorize] ở đây để ai cũng bấm nút được, ta sẽ tự check bên dưới
     public class CartController : Controller
     {
         private readonly WebThanhLyDbContext _context;
@@ -18,13 +18,17 @@ namespace WebBH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart(int productId, int quantity, string? size, string? color)
         {
+            // NẾU CHƯA ĐĂNG NHẬP -> Trả về JSON báo hiệu cần đăng nhập
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { requireLogin = true, redirectUrl = Url.Action("Login", "Account") });
+            }
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
 
-            // Gọi hàm xử lý và nhận thông báo lỗi (nếu có)
             string errorMessage = await ProcessAddToCart(userId, productId, quantity, size, color);
 
-            // Nếu có thông báo lỗi (chuỗi không rỗng) -> Trả về lỗi cho Client
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 return Json(new { success = false, message = errorMessage });
@@ -46,6 +50,12 @@ namespace WebBH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyNow(int productId, int quantity, string? size, string? color)
         {
+            // NẾU CHƯA ĐĂNG NHẬP -> Trả về JSON báo hiệu cần đăng nhập
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { requireLogin = true, redirectUrl = Url.Action("Login", "Account") });
+            }
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdStr, out int userId)) return RedirectToAction("Login", "Account");
 
@@ -53,21 +63,18 @@ namespace WebBH.Controllers
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                // Nếu lỗi, quay lại trang chi tiết và báo lỗi (Dùng TempData)
-                TempData["Error"] = errorMessage;
-                return RedirectToAction("Details", "Product", new { id = productId });
+                return Json(new { success = false, message = errorMessage });
             }
 
-            return RedirectToAction("Checkout");
+            return Json(new { success = true, redirectUrl = Url.Action("Checkout", "Cart") });
         }
 
-        // --- HÀM XỬ LÝ CHÍNH (ĐÃ SỬA LOGIC CHECK TỒN KHO) ---
+        // --- HÀM XỬ LÝ CHÍNH ---
         private async Task<string> ProcessAddToCart(int userId, int productId, int quantity, string? size, string? color)
         {
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return "Sản phẩm không tồn tại.";
 
-            // 1. Tìm biến thể trong kho
             var variant = await _context.ProductVariants.FirstOrDefaultAsync(v =>
                 v.ProductId == productId &&
                 (string.IsNullOrEmpty(size) ? (v.Size == null || v.Size == "") : v.Size == size) &&
@@ -76,7 +83,6 @@ namespace WebBH.Controllers
 
             if (variant == null) return "Phiên bản sản phẩm không hợp lệ.";
 
-            // 2. Tìm sản phẩm đã có trong giỏ hàng của user
             var cartItem = await _context.CartItems.FirstOrDefaultAsync(c =>
                 c.UserId == userId &&
                 c.ProductId == productId &&
@@ -84,20 +90,17 @@ namespace WebBH.Controllers
                 (c.Color ?? "") == (color ?? "")
             );
 
-            // 3. LOGIC QUAN TRỌNG: Tính tổng số lượng (Trong giỏ + Muốn thêm)
             int currentQtyInCart = cartItem?.Quantity ?? 0;
             int totalRequested = currentQtyInCart + quantity;
 
-            // Kiểm tra so với tồn kho
             if (totalRequested > variant.Quantity)
             {
                 return $"Kho chỉ còn {variant.Quantity} sản phẩm. Bạn đã có {currentQtyInCart} trong giỏ hàng.";
             }
 
-            // 4. Cập nhật hoặc Thêm mới
             if (cartItem != null)
             {
-                cartItem.Quantity = totalRequested; // Cập nhật số lượng mới
+                cartItem.Quantity = totalRequested;
                 _context.Update(cartItem);
             }
             else
@@ -113,27 +116,24 @@ namespace WebBH.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return ""; // Trả về chuỗi rỗng nghĩa là Thành công
+            return "";
         }
 
-        // 3. QUẢN LÝ GIỎ HÀNG (CHECKOUT)
+        // 3. CÁC HÀM CÒN LẠI (Gắn lại [Authorize] để bảo mật)
+        [Authorize]
         public async Task<IActionResult> Checkout()
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdStr, out int userId))
-                return RedirectToAction("Login", "Account");
+            if (!int.TryParse(userIdStr, out int userId)) return RedirectToAction("Login", "Account");
 
-            var cartItems = await _context.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .ToListAsync();
-
+            var cartItems = await _context.CartItems.Include(c => c.Product).Where(c => c.UserId == userId).ToListAsync();
             var user = await _context.Users.FindAsync(userId);
             ViewBag.UserInfo = user;
 
             return View(cartItems);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int change)
         {
@@ -177,6 +177,7 @@ namespace WebBH.Controllers
             });
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> RemoveItem(int cartItemId)
         {
@@ -191,7 +192,7 @@ namespace WebBH.Controllers
             return Json(new { success = true, cartTotal = cartTotal.ToString("N0") + " đ", count });
         }
 
-        // 4. XÁC NHẬN ĐẶT HÀNG
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmOrder(string fullName, string phone, string address)
@@ -206,7 +207,6 @@ namespace WebBH.Controllers
 
             if (!cartItems.Any()) return RedirectToAction("Index", "Product");
 
-            // Check lại tồn kho lần cuối trước khi tạo đơn
             foreach (var item in cartItems)
             {
                 var variant = await _context.ProductVariants
@@ -219,7 +219,7 @@ namespace WebBH.Controllers
                     TempData["Error"] = $"Sản phẩm {item.Product.Name} đã hết hàng hoặc không đủ số lượng!";
                     return RedirectToAction("Checkout");
                 }
-                variant.Quantity -= item.Quantity; // Trừ kho
+                variant.Quantity -= item.Quantity;
                 _context.Update(variant);
             }
 
@@ -254,6 +254,7 @@ namespace WebBH.Controllers
             return RedirectToAction("OrderSuccess", new { id = order.OrderId });
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> OrderSuccess(int id)
         {

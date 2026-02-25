@@ -5,7 +5,6 @@
     var categories = ViewBag.Categories as List<WebBH.Models.Category>;
     var currentSort = ViewBag.CurrentSort as string;
     var currentCat = ViewBag.CurrentCategory as int?;
-
     // Lấy danh sách ID đã thích từ ViewBag (đã được xử lý ở Controller)
     var likedIds = ViewBag.LikedProductIds as List<int> ?? new List<int>();
 }
@@ -74,12 +73,15 @@
                         <div class="col-md-4 col-sm-6">
                             <div class="product-card h-100 position-relative">
 
-                                <button class="btn-favorite position-absolute top-0 end-0 m-2 shadow-sm"
-                                        onclick="toggleFavorite(this, @item.ProductId)"
-                                        title="Yêu thích"
-                                        style="z-index: 10;">
-                                    <i class="bi @(isLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
-                                </button>
+                                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                                {
+                                    <button class="btn-favorite position-absolute top-0 end-0 m-2 shadow-sm"
+                                            onclick="toggleFavorite(this, @item.ProductId)"
+                                            title="Yêu thích"
+                                            style="z-index: 10;">
+                                        <i class="bi @(isLiked ? "bi-heart-fill text-danger" : "bi-heart text-dark")"></i>
+                                    </button>
+                                }
 
                                 <a href="/Product/Details/@item.ProductId" class="text-decoration-none text-dark">
                                     <div class="product-img-wrap mb-3 position-relative overflow-hidden rounded">

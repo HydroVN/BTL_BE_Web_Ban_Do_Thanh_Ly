@@ -1,33 +1,36 @@
-﻿// Hàm Toggle: Thêm hoặc Xóa yêu thích ở trang Danh sách/Chi tiết
-function toggleFavorite(btn, productId) {
-    // 1. Chặn click liên tục
+﻿function toggleFavorite(btn, productId) {
     if (btn.disabled) return;
     btn.disabled = true;
 
     const icon = btn.querySelector('i');
 
-    // 2. Gọi API
     fetch('/Favorite/Toggle?productId=' + productId, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     })
         .then(res => res.json())
         .then(data => {
+            // ========================================================
+            // ĐÂY LÀ ĐOẠN HIỆN MODAL YÊU CẦU ĐĂNG NHẬP GIỐNG MUA HÀNG
+            // ========================================================
+            if (data.requireLogin) {
+                var loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+                loginModal.show();
+                return; // Dừng lại không chạy tiếp code bên dưới
+            }
+
             if (data.success) {
-                // 3. Cập nhật giao diện dựa trên trạng thái trả về
                 if (data.status === 'added') {
                     icon.classList.remove('bi-heart', 'text-dark');
                     icon.classList.add('bi-heart-fill', 'text-danger');
-                    // (Tùy chọn) Có thể thêm thông báo nhỏ ở đây
                 } else {
                     icon.classList.remove('bi-heart-fill', 'text-danger');
                     icon.classList.add('bi-heart', 'text-dark');
                 }
             } else {
-                // Xử lý lỗi (ví dụ: chưa đăng nhập)
-                alert(data.message);
-                if (data.message.includes("đăng nhập")) {
-                    window.location.href = "/Account/Login";
-                }
+                alert(data.message || "Đã xảy ra lỗi không xác định!");
             }
         })
         .catch(err => {
@@ -35,34 +38,36 @@ function toggleFavorite(btn, productId) {
             alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
         })
         .finally(() => {
-            // Mở lại nút
             btn.disabled = false;
         });
 }
 
-// Hàm Xóa: Dùng cho trang "Danh sách yêu thích" (có confirm và xóa dòng)
 function removeFavoriteItem(productId) {
     if (!confirm("Bạn muốn bỏ sản phẩm này khỏi danh sách yêu thích?")) return;
 
     fetch('/Favorite/Toggle?productId=' + productId, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     })
         .then(res => res.json())
         .then(data => {
-            if (data.success && data.status === 'removed') {
-                // Tìm và xóa thẻ HTML chứa sản phẩm đó
-                const itemElement = document.getElementById('fav-item-' + productId);
-                if (itemElement) {
-                    itemElement.remove();
-                }
+            // Hiện Modal nếu lỡ hết hạn đăng nhập
+            if (data.requireLogin) {
+                var loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+                loginModal.show();
+                return;
+            }
 
-                // Kiểm tra nếu danh sách trống thì reload để hiện thông báo trống
+            if (data.success && data.status === 'removed') {
+                const itemElement = document.getElementById('fav-item-' + productId);
+                if (itemElement) itemElement.remove();
+
                 const remainingItems = document.querySelectorAll('[id^="fav-item-"]');
-                if (remainingItems.length === 0) {
-                    location.reload();
-                }
+                if (remainingItems.length === 0) location.reload();
             } else {
-                alert(data.message);
+                alert(data.message || "Lỗi không xác định!");
             }
         })
         .catch(err => console.error(err));

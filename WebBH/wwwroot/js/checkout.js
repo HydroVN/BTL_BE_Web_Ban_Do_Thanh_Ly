@@ -77,10 +77,7 @@ function closeToast() {
     }
 }
 
-
-/* ================================================= */
 /* LOGIC MODAL XÓA (Giữ nguyên)                      */
-/* ================================================= */
 function openDeleteModal(cartItemId, productName, productImg) {
     targetCartItemId = cartItemId;
     document.getElementById('del-modal-name').innerText = productName;

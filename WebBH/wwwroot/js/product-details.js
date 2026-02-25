@@ -17,25 +17,22 @@
         const selectedSize = document.querySelector('input[name="size"]:checked')?.value || "";
         const selectedColor = document.querySelector('input[name="color"]:checked')?.value || "";
 
-        // A. Xử lý các nút MÀU (Dựa trên Size đang chọn)
+        // A. Xử lý các nút MÀU
         colorInputs.forEach(input => {
             const color = input.value;
             const label = document.querySelector(`label[for="${input.id}"]`);
             let isAvailable = false;
 
             if (selectedSize) {
-                // Đã chọn Size -> Check xem cặp (Size này + Màu này) có hàng không?
                 const variant = variants.find(v => (v.Size || "") === selectedSize && (v.Color || "") === color);
                 isAvailable = variant && variant.Quantity > 0;
             } else {
-                // Chưa chọn Size (hoặc không có Size) -> Check xem Màu này có hàng không?
-                // Logic: Tìm variant có màu này và (Size rỗng hoặc Size bất kỳ còn hàng)
                 isAvailable = variants.some(v => (v.Color || "") === color && v.Quantity > 0);
             }
             toggleOptionState(input, label, isAvailable);
         });
 
-        // B. Xử lý các nút SIZE (Dựa trên Màu đang chọn)
+        // B. Xử lý các nút SIZE
         sizeInputs.forEach(input => {
             const size = input.value;
             const label = document.querySelector(`label[for="${input.id}"]`);
@@ -61,7 +58,13 @@
         } else {
             label.classList.add('option-disabled');
             input.disabled = true;
-            if (input.checked) input.checked = false;
+            // Xử lý an toàn: nếu nút đang bị disable mà lại đang check thì bỏ check
+            if (input.checked) {
+                input.checked = false;
+                // Cần reset lại biến theo dõi click bên dưới nếu nó bị disable
+                if (input.name === 'size') lastSelectedSize = null;
+                if (input.name === 'color') lastSelectedColor = null;
+            }
         }
     }
 
@@ -72,7 +75,6 @@
         btnBuy.disabled = true;
         btnAdd.innerHTML = "THÊM GIỎ HÀNG";
 
-        // Logic mới: Chỉ bắt buộc chọn NẾU CÓ danh sách chọn
         const hasSizeOptions = sizeInputs.length > 0;
         const hasColorOptions = colorInputs.length > 0;
 
@@ -81,7 +83,6 @@
             return;
         }
 
-        // Tìm biến thể khớp (Lưu ý so sánh chuỗi rỗng)
         const match = variants.find(v => (v.Size || "") === size && (v.Color || "") === color);
 
         if (match && match.Quantity > 0) {
@@ -99,78 +100,108 @@
         }
     }
 
-    sizeInputs.forEach(el => el.addEventListener('change', updateOptionsAvailability));
-    colorInputs.forEach(el => el.addEventListener('change', updateOptionsAvailability));
+
+    // ==============================================================
+    // FIX: LOGIC BẤM LẠI ĐỂ BỎ CHỌN (TOGGLE RADIO BUTTONS)
+    // ==============================================================
+    let lastSelectedSize = null;
+    sizeInputs.forEach(el => {
+        // Sự kiện click để bắt trường hợp bấm vào cái đang chọn
+        el.addEventListener('click', function (e) {
+            if (lastSelectedSize === this) {
+                this.checked = false; // Gỡ check
+                lastSelectedSize = null; // Trả về null
+                updateOptionsAvailability(); // Cập nhật lại kho
+            } else {
+                lastSelectedSize = this; // Lưu lại cái mới chọn
+            }
+        });
+        // Sự kiện change chạy mặc định khi chọn cái mới
+        el.addEventListener('change', updateOptionsAvailability);
+    });
+
+    let lastSelectedColor = null;
+    colorInputs.forEach(el => {
+        el.addEventListener('click', function (e) {
+            if (lastSelectedColor === this) {
+                this.checked = false;
+                lastSelectedColor = null;
+                updateOptionsAvailability();
+            } else {
+                lastSelectedColor = this;
+            }
+        });
+        el.addEventListener('change', updateOptionsAvailability);
+    });
+
     updateOptionsAvailability();
 });
 
 // ============================================================
-// PHẦN XỬ LÝ MUA HÀNG (SỬA ĐỔI)
+// PHẦN XỬ LÝ MUA HÀNG & GỌI MODAL NẾU CHƯA ĐĂNG NHẬP
 // ============================================================
 
-function handlePurchase(url, isAjax) {
+function handlePurchase(url, isBuyNow) {
     const form = document.getElementById('cartForm');
 
-    // 1. Validate Size (chỉ khi có nút chọn)
+    // 1. Validate Size 
     const sizeRadios = document.querySelectorAll('input[name="size"]');
     if (sizeRadios.length > 0 && !document.querySelector('input[name="size"]:checked')) {
         alert("Vui lòng chọn Size!");
         return;
     }
 
-    // 2. Validate Color (chỉ khi có nút chọn)
+    // 2. Validate Color
     const colorRadios = document.querySelectorAll('input[name="color"]');
     if (colorRadios.length > 0 && !document.querySelector('input[name="color"]:checked')) {
         alert("Vui lòng chọn Màu!");
         return;
     }
 
-    // 3. Kiểm tra nút mua có bị disable không
+    // 3. Kiểm tra nút có bị disable không
     const btnAdd = document.getElementById('btnAddToCart');
     if (btnAdd.disabled) {
         alert("Sản phẩm này hiện không khả dụng!");
         return;
     }
 
-    if (isAjax) {
-        const formData = new FormData(form);
+    const formData = new FormData(form);
+    if (!formData.has('size')) formData.append('size', '');
+    if (!formData.has('color')) formData.append('color', '');
 
-        // Đảm bảo gửi chuỗi rỗng nếu không có giá trị (để Backend nhận được)
-        if (!formData.has('size')) formData.append('size', '');
-        if (!formData.has('color')) formData.append('color', '');
+    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const token = tokenInput ? tokenInput.value : '';
 
-        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-        const token = tokenInput ? tokenInput.value : '';
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'RequestVerificationToken': token,
-                'X-Requested-With': 'XMLHttpRequest'
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'RequestVerificationToken': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(res => res.json())
+        .then(data => {
+            // === GỌI MODAL HTML NẾU CHƯA ĐĂNG NHẬP ===
+            if (data.requireLogin) {
+                var loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+                loginModal.show();
+                return;
             }
-        })
-            .then(res => {
-                if (res.status === 401) {
-                    alert("Vui lòng đăng nhập để tiếp tục!");
-                    window.location.href = '/Account/Login';
-                    return;
-                }
-                return res.json();
-            })
-            .then(data => {
-                if (data && data.success) {
+
+            // === KHI ĐÃ ĐĂNG NHẬP ===
+            if (data.success) {
+                if (isBuyNow && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
                     updateCartBadge(data.count);
                     showCartToast(data.newItem);
-                } else if (data) {
-                    alert(data.message || "Lỗi không xác định");
                 }
-            })
-            .catch(err => console.error("Error:", err));
-    } else {
-        form.action = url;
-        form.submit();
-    }
+            } else {
+                alert(data.message || "Lỗi không xác định");
+            }
+        })
+        .catch(err => console.error("Error:", err));
 }
 
 function updateCartBadge(count) {
@@ -187,8 +218,8 @@ function showCartToast(item) {
 
     document.getElementById('toast-img').src = item.imageUrl || "https://dummyimage.com/50x50/eee/aaa";
     document.getElementById('toast-name').innerText = item.name;
-    document.getElementById('toast-size').innerText = item.size || "Tiêu chuẩn"; // Hiện chữ khác nếu rỗng
-    document.getElementById('toast-color').innerText = item.color || "Tiêu chuẩn";
+    document.getElementById('toast-size').innerText = item.size || "Mặc định";
+    document.getElementById('toast-color').innerText = item.color || "Mặc định";
     document.getElementById('toast-price').innerText = item.price;
 
     toast.classList.add('show');
