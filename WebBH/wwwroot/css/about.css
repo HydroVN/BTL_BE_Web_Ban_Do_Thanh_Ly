@@ -1,0 +1,14 @@
+﻿/* Căn đều chữ 2 bên cho các đoạn văn */
+.text-justify {
+    text-align: justify;
+}
+
+/* Hiệu ứng nổi lên và đổ bóng khi di chuột vào thẻ (Card) */
+.hover-shadow {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+    .hover-shadow:hover {
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-5px);
+    }

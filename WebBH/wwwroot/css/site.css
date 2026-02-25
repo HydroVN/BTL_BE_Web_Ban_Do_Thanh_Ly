@@ -4,7 +4,10 @@ body:not(.admin-layout) {
     background: white;
     color: black;
 }
-
+/* Đẩy toàn bộ trang xuống để không bị Navbar đè lên */
+body {
+    padding-top: 76px; /* Thay số này bằng chiều cao thực tế thanh Nav của bạn */
+}
 
 a {
     text-decoration: none;

@@ -1,0 +1,58 @@
+﻿/* Khung menu bên trái trượt theo màn hình */
+.terms-sidebar {
+    position: sticky;
+    top: 100px; /* Cách thanh Navbar fixed-top một khoảng */
+    border-right: 1px solid #dee2e6;
+}
+
+/* Định dạng các link menu */
+.terms-nav .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 4px 0 0 4px;
+    transition: all 0.2s ease;
+}
+
+    /* Hiệu ứng khi hover hoặc đang chọn */
+    .terms-nav .nav-link:hover,
+    .terms-nav .nav-link.active {
+        color: #000;
+        background-color: #f8f9fa;
+        border-left: 3px solid #000;
+    }
+
+/* Định dạng phần nội dung đọc */
+.terms-content {
+    padding-left: 1rem;
+}
+
+    .terms-content h4 {
+        font-family: 'Playfair Display', serif;
+        font-weight: bold;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+
+        /* Sửa khoảng cách thẻ h4 đầu tiên */
+        .terms-content h4:first-child {
+            margin-top: 0;
+        }
+
+    .terms-content p,
+    .terms-content li {
+        color: #495057;
+        line-height: 1.8;
+        text-align: justify;
+        font-size: 0.95rem;
+    }
+
+    .terms-content ul {
+        margin-bottom: 1.5rem;
+    }
+
+/* Kích hoạt lướt mượt khi bấm link (Smooth Scroll) */
+html {
+    scroll-behavior: smooth;
+}

@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Tài Khoản Bị Khóa";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RE:COLLECT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/account-restricted.css" asp-append-version="true">
+</head>
+<body>
+    <div class="p-4 d-flex justify-content-between align-items-center w-100 bg-white border-bottom">
+        <strong class="text-uppercase" style="letter-spacing: 2px; font-weight: 700;">
+            <i class="bi bi-square-fill me-2"></i>RE:COLLECT
+        </strong>
+        <a href="#" id="closeRestrictedPage" class="text-muted text-decoration-none fs-5"><i class="bi bi-x-lg"></i></a>
+    </div>
+
+    <div class="restricted-card mt-5 mb-5">
+        <h1 class="restricted-title">Tài khoản của bạn<br />đã bị hạn chế</h1>
+        <div class="divider"></div>
+
+        <div class="info-row border-top-custom">
+            <div class="info-label">CẤP LỆNH BỞI</div>
+            <div class="info-value fw-medium">Ban Quản Trị Hệ Thống</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">LÝ DO KHÓA</div>
+            <div class="info-value">
+                <strong class="text-danger">@ViewBag.Reason</strong>
+                <p class="text-muted small mt-2 lh-lg text-justify">
+                    Đội ngũ kiểm duyệt của chúng tôi xác định tài khoản của bạn đã có hoạt động vi phạm tiêu chuẩn và chính sách của nền tảng. Lệnh hạn chế này ngăn bạn truy cập hệ thống, mua hàng hoặc liên hệ với các thành viên khác.
+                </p>
+                <div class="mt-3 p-3 bg-light border-start border-4 border-warning small">
+                    <i class="bi bi-info-circle me-1"></i> Hệ thống sẽ tự động mở khóa khi hết thời gian phạt. Nếu bạn bị khóa vĩnh viễn, quyết định này là không thể thay đổi.
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 d-flex flex-column gap-3">
+            <a href="mailto:support@recollect.com" class="btn btn-support w-100 text-center text-decoration-none">
+                <i class="bi bi-envelope-fill me-2"></i> LIÊN HỆ HỖ TRỢ
+            </a>
+            <a href="/" class="text-center text-muted text-decoration-none small text-uppercase fw-bold mt-2" style="letter-spacing: 1px; text-decoration: underline !important;">
+                QUAY VỀ TRANG CHỦ
+            </a>
+        </div>
+    </div>
+
+    <script src="~/js/account-restricted.js" asp-append-version="true"></script>
+</body>
+</html>

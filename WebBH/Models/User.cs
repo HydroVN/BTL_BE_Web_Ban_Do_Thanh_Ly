@@ -31,6 +31,12 @@ public partial class User
     [Column(TypeName = "datetime")]
     public DateTime? CreatedAt { get; set; }
 
+    public bool IsBanned { get; set; }
+
+    public string? BanReason { get; set; }
+
+    public DateTime? BannedUntil { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 

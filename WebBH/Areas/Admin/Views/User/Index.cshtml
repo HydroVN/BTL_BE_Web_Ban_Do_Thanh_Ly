@@ -35,7 +35,7 @@
                     <thead>
                         <tr class="text-muted small">
                             <th>ID</th>
-                            <th>HỌ TÊN</th>
+                            <th>HỌ TÊN & TRẠNG THÁI</th>
                             <th>EMAIL</th>
                             <th>SỐ ĐIỆN THOẠI</th>
                             <th class="text-end">THAO TÁC</th>
@@ -46,25 +46,42 @@
                         {
                             <tr>
                                 <td>#@item.UserId</td>
-                                <td class="fw-bold text-info">@item.FullName</td>
+                                <td>
+                                    <span class="fw-bold text-info">@item.FullName</span>
+                                    @if (item.IsBanned)
+                                    {
+                                        <span class="badge bg-danger ms-2"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                        <div class="text-danger small mt-1" style="font-size: 0.75rem;">
+                                            @(item.BannedUntil.HasValue ? $"Đến: {item.BannedUntil.Value.ToString("dd/MM/yyyy HH:mm")}" : "Khóa vĩnh viễn")
+                                        </div>
+                                    }
+                                </td>
                                 <td>@item.Email</td>
                                 <td>@(item.PhoneNumber ?? "---")</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-warning fw-bold text-dark me-1"
+                                    <button class="btn btn-sm btn-warning fw-bold text-dark me-1 mb-1"
                                             data-bs-toggle="modal" data-bs-target="#editModal"
                                             data-id="@item.UserId" data-name="@item.FullName"
                                             data-email="@item.Email" data-phone="@item.PhoneNumber">
                                         <i class="bi bi-pencil"></i> Sửa
                                     </button>
 
-                                    <form asp-action="Delete" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="userId" value="@item.UserId" />
-                                        <button type="submit" class="btn btn-sm btn-danger fw-bold"
-                                                onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng @item.FullName?')">
-                                            <i class="bi bi-trash"></i> Xóa
+                                    @if (item.IsBanned)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success fw-bold me-1 mb-1" onclick="openUnbanModal(@item.UserId, '@item.Email', '@item.FullName')">
+                                            <i class="bi bi-unlock"></i> Mở
                                         </button>
-                                    </form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold me-1 mb-1" onclick="openBanModal(@item.UserId, '@item.Email', '@item.FullName')">
+                                            <i class="bi bi-lock-fill"></i> Khóa
+                                        </button>
+                                    }
+
+                                    <button type="button" class="btn btn-sm btn-danger fw-bold mb-1" onclick="openDeleteModal(@item.UserId, '@item.Email', '@item.FullName')">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
                                 </td>
                             </tr>
                         }
@@ -77,7 +94,7 @@
 
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary modal-content-custom">
+        <div class="modal-content bg-dark text-white border-secondary">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title fw-bold"><i class="bi bi-person-gear me-2"></i>Cập nhật khách hàng</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -86,25 +103,131 @@
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="userId" id="m_id" />
-
                     <div class="mb-3">
                         <label class="form-label-custom">HỌ VÀ TÊN</label>
-                        <input type="text" name="fullName" id="m_name" class="form-control form-control-dark" required />
+                        <input type="text" name="fullName" id="m_name" class="form-control bg-secondary text-white border-secondary" required />
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label-custom">EMAIL / TÊN ĐĂNG NHẬP</label>
-                        <input type="email" name="email" id="m_email" class="form-control form-control-dark" required />
+                        <label class="form-label-custom">EMAIL</label>
+                        <input type="email" name="email" id="m_email" class="form-control bg-secondary text-white border-secondary" required />
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label-custom">SỐ ĐIỆN THOẠI</label>
-                        <input type="text" name="phone" id="m_phone" class="form-control form-control-dark" />
+                        <input type="text" name="phone" id="m_phone" class="form-control bg-secondary text-white border-secondary" />
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4">Lưu thay đổi</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="banUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-danger shadow-lg">
+            <div class="modal-header border-0 pb-0 flex-column align-items-start position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                <div class="mb-3 mt-2 rounded d-flex align-items-center justify-content-center text-danger" style="width: 40px; height: 40px; background-color: rgba(220, 53, 69, 0.15);">
+                    <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+                </div>
+                <h4 class="modal-title fw-bold" style="font-family: serif;">Suspend Account</h4>
+            </div>
+            <form asp-action="SuspendAccount" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body pt-4">
+                    <input type="hidden" id="banUserId" name="userId" />
+                    <div class="d-flex align-items-center p-3 mb-4 rounded bg-secondary-subtle border border-secondary">
+                        <div class="bg-danger rounded-circle me-3 d-flex align-items-center justify-content-center text-white fw-bold" style="width: 45px; height: 45px;" id="banUserAvatar">U</div>
+                        <div>
+                            <h6 class="mb-0 fw-bold text-white" id="banUserName">Tên Khách</h6>
+                            <small class="text-muted" id="banUserEmail">email@example.com</small>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-muted mb-1">THỜI GIAN</label>
+                            <select class="form-select bg-secondary text-white border-secondary" name="durationDays" required>
+                                <option value="3">3 Ngày</option>
+                                <option value="7">7 Ngày</option>
+                                <option value="30">30 Ngày</option>
+                                <option value="-1">Vĩnh viễn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-muted mb-1">LÝ DO CHÍNH</label>
+                            <select class="form-select bg-secondary text-white border-secondary" name="reason" required>
+                                <option value="Vi phạm tiêu chuẩn">Vi phạm tiêu chuẩn</option>
+                                <option value="Hành vi lừa đảo">Lừa đảo</option>
+                                <option value="Hàng giả/nhái">Hàng giả/nhái</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-outline-light px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger fw-bold px-4">Xác nhận Khóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="unbanUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-success shadow-lg">
+            <div class="modal-header border-0 pb-0 flex-column align-items-start position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                <div class="mb-3 mt-2 rounded d-flex align-items-center justify-content-center text-success" style="width: 40px; height: 40px; background-color: rgba(25, 135, 84, 0.15);">
+                    <i class="bi bi-unlock-fill fs-5"></i>
+                </div>
+                <h4 class="modal-title fw-bold" style="font-family: serif;">Restore Account</h4>
+            </div>
+            <form asp-action="UnbanAccount" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body pt-4">
+                    <input type="hidden" id="unbanUserId" name="userId" />
+                    <div class="border-top border-secondary pt-4">
+                        <div class="d-flex justify-content-between mb-3"><span class="text-muted small">HỌ TÊN</span><span id="unbanUserName" class="fw-bold"></span></div>
+                        <div class="d-flex justify-content-between mb-3 border-top border-secondary pt-3"><span class="text-muted small">USER ID</span><span id="unbanUserDisplayId"></span></div>
+                        <div class="d-flex justify-content-between mb-3 border-top border-secondary pt-3"><span class="text-muted small">EMAIL</span><span id="unbanUserEmail"></span></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-outline-light flex-grow-1" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success flex-grow-1 fw-bold text-dark">Xác nhận Mở Khóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-danger shadow-lg">
+            <div class="modal-header border-0 pb-0 flex-column align-items-start position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                <div class="mb-3 mt-2 rounded d-flex align-items-center justify-content-center text-danger" style="width: 40px; height: 40px; background-color: rgba(220, 53, 69, 0.15);">
+                    <i class="bi bi-trash-fill fs-5"></i>
+                </div>
+                <h4 class="modal-title fw-bold" style="font-family: serif;">Delete Account</h4>
+            </div>
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body pt-4">
+                    <input type="hidden" id="deleteUserId" name="userId" />
+                    <div class="border-top border-secondary pt-4">
+                        <div class="d-flex justify-content-between mb-3"><span class="text-muted small">TÊN KHÁCH</span><span id="deleteUserName" class="fw-bold text-danger"></span></div>
+                        <div class="d-flex justify-content-between mb-3 border-top border-secondary pt-3"><span class="text-muted small">MÃ SỐ</span><span id="deleteUserDisplayId"></span></div>
+                        <div class="d-flex justify-content-between mb-3 border-top border-secondary pt-3"><span class="text-muted small">EMAIL</span><span id="deleteUserEmail"></span></div>
+                    </div>
+                    <div class="alert alert-warning rounded-0 border-0 mt-3 small"><i class="bi bi-info-circle-fill me-2"></i>Lưu ý: Không thể xóa khách hàng đã có đơn hàng.</div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-outline-light flex-grow-1" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger flex-grow-1 fw-bold">Xác nhận Xóa</button>
                 </div>
             </form>
         </div>

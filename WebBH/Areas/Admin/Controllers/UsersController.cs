@@ -7,18 +7,18 @@ using WebBH.Models;
 namespace WebBH.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Route("Admin/Users/[action]")] // Ép đường dẫn là Admin/Users cho đúng ý bạn
+    [Route("Admin/Users/[action]")]
     public class UserController : Controller
     {
         private readonly WebThanhLyDbContext _context;
 
         public UserController(WebThanhLyDbContext context) { _context = context; }
 
-        [Route("/Admin/Users")] // Đường dẫn mặc định cho trang danh sách
+        [Route("/Admin/Users")]
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users
-                .Where(u => u.RoleId != 1) // Chỉ hiện User (RoleId 2), ẩn Admin (RoleId 1)
+                .Where(u => u.RoleId != 1)
                 .OrderByDescending(u => u.UserId)
                 .ToListAsync();
             return View(users);
@@ -59,6 +59,52 @@ namespace WebBH.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 TempData["Message"] = "Đã xóa user!";
             }
+            return RedirectToAction("Index");
+        }
+        // HÀM KHÓA TÀI KHOẢN (BAN)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SuspendAccount(int userId, string reason, int durationDays, string notes)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            user.IsBanned = true;
+            // Nối lý do và ghi chú để lưu vào DB
+            user.BanReason = string.IsNullOrEmpty(notes) ? reason : $"{reason}. Ghi chú: {notes}";
+
+            // Tính thời gian hết hạn
+            if (durationDays == -1)
+            {
+                user.BannedUntil = null; // Bị khóa vĩnh viễn
+            }
+            else
+            {
+                user.BannedUntil = DateTime.Now.AddDays(durationDays);
+            }
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            TempData["Message"] = $"Đã khóa tài khoản {user.Email} thành công.";
+
+            return RedirectToAction("Index");
+        }
+        // HÀM MỞ KHÓA THỦ CÔNG (UNBAN)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnbanAccount(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            user.IsBanned = false;
+            user.BanReason = null;
+            user.BannedUntil = null;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            TempData["Message"] = $"Đã mở khóa tài khoản {user.Email}.";
+
             return RedirectToAction("Index");
         }
     }
