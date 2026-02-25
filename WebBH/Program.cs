@@ -30,7 +30,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddTransient<WebBH.Services.EmailService>();
 var app = builder.Build();
-<<<<<<< HEAD
+
 //using (var scope = app.Services.CreateScope())
 //{
 //    var services = scope.ServiceProvider;
@@ -38,9 +38,8 @@ var app = builder.Build();
 
 //    await SeedData.InitializeAsync(context);
 //}
-=======
 
->>>>>>> origin/main
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
