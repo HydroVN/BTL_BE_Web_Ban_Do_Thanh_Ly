@@ -74,7 +74,7 @@
                                     }
                                     else
                                     {
-                                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold me-1 mb-1" onclick="openBanModal(@item.UserId, '@item.Email', '@item.FullName')">
+                                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold me-1 mb-1" onclick="BanModal(@item.UserId, '@item.Email', '@item.FullName')">
                                             <i class="bi bi-lock-fill"></i> Khóa
                                         </button>
                                     }
@@ -139,7 +139,7 @@
                 @Html.AntiForgeryToken()
                 <div class="modal-body pt-4">
                     <input type="hidden" id="banUserId" name="userId" />
-                    <div class="d-flex align-items-center p-3 mb-4 rounded bg-secondary-subtle border border-secondary">
+                    <div class="d-flex align-items-center p-3 mb-4 rounded border border-secondary">
                         <div class="bg-danger rounded-circle me-3 d-flex align-items-center justify-content-center text-white fw-bold" style="width: 45px; height: 45px;" id="banUserAvatar">U</div>
                         <div>
                             <h6 class="mb-0 fw-bold text-white" id="banUserName">Tên Khách</h6>
@@ -148,12 +148,13 @@
                     </div>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="small fw-bold text-muted mb-1">THỜI GIAN</label>
-                            <select class="form-select bg-secondary text-white border-secondary" name="durationDays" required>
-                                <option value="3">3 Ngày</option>
-                                <option value="7">7 Ngày</option>
-                                <option value="30">30 Ngày</option>
-                                <option value="-1">Vĩnh viễn</option>
+                            <label class="small fw-bold text-muted mb-1">THỜI GIAN PHẠT</label>
+                            <select class="form-select bg-secondary text-white border-secondary" name="durationHours" required>
+                                <option value="1">1 Giờ (Cảnh cáo nhẹ)</option>
+                                <option value="3">3 Giờ</option>
+                                <option value="24">24 Giờ (1 Ngày)</option>
+                                <option value="72">72 Giờ (3 Ngày)</option>
+                                <option value="-1">Khóa Vĩnh viễn</option>
                             </select>
                         </div>
                         <div class="col-md-6">

@@ -87,7 +87,8 @@ namespace WebBH.Controllers
                     return RedirectToAction("AccountRestricted", "Account", new
                     {
                         reason = user.BanReason,
-                        until = user.BannedUntil?.ToString("dd/MM/yyyy HH:mm")
+                        until = user.BannedUntil?.ToString("dd/MM/yyyy HH:mm"),
+                        untilIso = user.BannedUntil?.ToString("yyyy-MM-ddTHH:mm:ss") // Thêm dòng này cho JS
                     });
                 }
             }
@@ -118,10 +119,11 @@ namespace WebBH.Controllers
         // TRANG HIỂN THỊ THÔNG BÁO LỖI KHI BỊ KHÓA NHẬN THÊM THAM SỐ `until`
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult AccountRestricted(string reason, string until)
+        public IActionResult AccountRestricted(string reason, string until, string untilIso) // Thêm tham số untilIso
         {
             ViewBag.Reason = reason ?? "Vi phạm chính sách và tiêu chuẩn cộng đồng của hệ thống.";
             ViewBag.BannedUntil = until;
+            ViewBag.BannedUntilIso = untilIso; // Truyền ra View
             return View();
         }
 

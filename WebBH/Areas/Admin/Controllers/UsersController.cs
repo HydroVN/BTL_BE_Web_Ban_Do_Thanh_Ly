@@ -64,23 +64,23 @@ namespace WebBH.Areas.Admin.Controllers
         // HÀM KHÓA TÀI KHOẢN (BAN)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SuspendAccount(int userId, string reason, int durationDays, string notes)
+        public async Task<IActionResult> SuspendAccount(int userId, string reason, int durationHours, string notes) // Đổi tên biến thành durationHours
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
             user.IsBanned = true;
-            // Nối lý do và ghi chú để lưu vào DB
             user.BanReason = string.IsNullOrEmpty(notes) ? reason : $"{reason}. Ghi chú: {notes}";
 
-            // Tính thời gian hết hạn
-            if (durationDays == -1)
+            // TÍNH THỜI GIAN THEO GIỜ
+            if (durationHours == -1)
             {
-                user.BannedUntil = null; // Bị khóa vĩnh viễn
+                user.BannedUntil = null; // Khóa vĩnh viễn
             }
             else
             {
-                user.BannedUntil = DateTime.Now.AddDays(durationDays);
+                // SỬ DỤNG AddHours THAY VÌ AddDays
+                user.BannedUntil = DateTime.Now.AddHours(durationHours);
             }
 
             _context.Users.Update(user);

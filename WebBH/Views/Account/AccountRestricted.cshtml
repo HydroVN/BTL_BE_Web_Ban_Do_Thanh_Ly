@@ -33,15 +33,64 @@
         </div>
 
         <div class="info-row">
+            <div class="info-label">THỜI HẠN KHÓA</div>
+            <div class="info-value">
+                @if (!string.IsNullOrEmpty(ViewBag.BannedUntil))
+                {
+                    <span class="badge bg-dark text-white px-3 py-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-clock-history me-1"></i> Đến @ViewBag.BannedUntil
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger text-white px-3 py-2 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">
+                        <i class="bi bi-slash-circle me-1"></i> Vĩnh viễn
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="info-row">
             <div class="info-label">LÝ DO KHÓA</div>
             <div class="info-value">
                 <strong class="text-danger">@ViewBag.Reason</strong>
                 <p class="text-muted small mt-2 lh-lg text-justify">
                     Đội ngũ kiểm duyệt của chúng tôi xác định tài khoản của bạn đã có hoạt động vi phạm tiêu chuẩn và chính sách của nền tảng. Lệnh hạn chế này ngăn bạn truy cập hệ thống, mua hàng hoặc liên hệ với các thành viên khác.
                 </p>
+
                 <div class="mt-3 p-3 bg-light border-start border-4 border-warning small">
                     <i class="bi bi-info-circle me-1"></i> Hệ thống sẽ tự động mở khóa khi hết thời gian phạt. Nếu bạn bị khóa vĩnh viễn, quyết định này là không thể thay đổi.
                 </div>
+
+                @if (!string.IsNullOrEmpty(ViewBag.BannedUntil))
+                {
+                    <div class="mt-4 p-3 rounded shadow-sm" style="background-color: #fff5f5; border: 1px dashed #dc3545;" id="countdownContainer" data-until="@ViewBag.BannedUntilIso">
+                        <small class="text-danger fw-bold d-block mb-3" style="letter-spacing: 1px;"><i class="bi bi-hourglass-split me-1"></i> THỜI GIAN CÒN LẠI:</small>
+
+                        <div class="d-flex gap-2 text-center" id="countdownTimer">
+                            <div class="bg-white text-danger border border-danger rounded px-2 py-2 shadow-sm" style="min-width: 65px;">
+                                <h4 class="mb-0 fw-bold" id="cd-days">00</h4>
+                                <small style="font-size: 0.65rem;" class="fw-bold">NGÀY</small>
+                            </div>
+                            <div class="bg-white text-danger border border-danger rounded px-2 py-2 shadow-sm" style="min-width: 65px;">
+                                <h4 class="mb-0 fw-bold" id="cd-hours">00</h4>
+                                <small style="font-size: 0.65rem;" class="fw-bold">GIỜ</small>
+                            </div>
+                            <div class="bg-white text-danger border border-danger rounded px-2 py-2 shadow-sm" style="min-width: 65px;">
+                                <h4 class="mb-0 fw-bold" id="cd-minutes">00</h4>
+                                <small style="font-size: 0.65rem;" class="fw-bold">PHÚT</small>
+                            </div>
+                            <div class="bg-white text-danger border border-danger rounded px-2 py-2 shadow-sm" style="min-width: 65px;">
+                                <h4 class="mb-0 fw-bold" id="cd-seconds">00</h4>
+                                <small style="font-size: 0.65rem;" class="fw-bold">GIÂY</small>
+                            </div>
+                        </div>
+
+                        <div id="countdownFinished" class="d-none mt-2 text-success fw-bold p-2 bg-success-subtle rounded border border-success text-center">
+                            <i class="bi bi-check-circle-fill me-1"></i> Đã hết hạn phạt! Bạn có thể đăng nhập lại.
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
