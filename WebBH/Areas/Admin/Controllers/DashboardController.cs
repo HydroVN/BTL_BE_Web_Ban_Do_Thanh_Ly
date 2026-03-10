@@ -59,7 +59,9 @@ namespace WebBH.Areas.Admin.Controllers
             // 3. TỔNG HỢP DATA
             var vm = new DashboardVM
             {
-                TotalUsers = _context.Users.Count(),
+                // Thêm điều kiện lọc chỉ đếm user có Role là "User"
+                TotalUsers = _context.Users.Count(u => u.Role.Name == "User"),
+
                 TotalProducts = _context.Products.Count(),
                 TotalOrders = _context.Orders.Count(),
                 TotalRevenue = _context.Orders
@@ -103,7 +105,9 @@ namespace WebBH.Areas.Admin.Controllers
                     TotalRevenue = g.Sum(od => od.Quantity * od.UnitPrice)
                 }).OrderByDescending(x => x.TotalSold).Take(5).ToList();
 
-            var totalUsers = _context.Users.Count();
+            // Cập nhật lại logic đếm user khi xuất Excel
+            var totalUsers = _context.Users.Count(u => u.Role.Name == "User");
+
             var totalProducts = _context.Products.Count();
             var totalOrders = _context.Orders.Count();
             var totalRevenue = _context.Orders.Where(o => o.Status == "Success" || o.Status == "Completed").Sum(x => x.TotalAmount) ?? 0;

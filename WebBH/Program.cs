@@ -46,6 +46,7 @@ if (!app.Environment.IsDevelopment())
 //}
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 // 2. KÍCH HOẠT SESSION (Bắt buộc phải nằm TRƯỚC Authentication)

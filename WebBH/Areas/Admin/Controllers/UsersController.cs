@@ -7,6 +7,7 @@ using WebBH.Models;
 namespace WebBH.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     [Route("Admin/Users/[action]")]
     public class UserController : Controller
     {
