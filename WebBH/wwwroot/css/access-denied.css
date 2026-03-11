@@ -68,3 +68,24 @@ p {
 .text-muted {
     color: #94a3b8 !important;
 }
+/* Tùy chỉnh ô chứa icon liên hệ */
+.contact-icon-box {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hiệu ứng di chuột vào thẻ liên hệ */
+.contact-card-hover {
+    transition: all 0.2s ease-in-out;
+}
+
+    .contact-card-hover:hover {
+        transform: translateY(-4px);
+        border-color: #6c757d !important;
+        background-color: #111 !important;
+    }
