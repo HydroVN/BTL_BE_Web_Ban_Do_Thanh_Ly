@@ -25,7 +25,6 @@ namespace WebBH.Controllers
             _emailService = emailService;
             _cache = cache;
         }
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -37,7 +36,6 @@ namespace WebBH.Controllers
             }
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
@@ -46,32 +44,26 @@ namespace WebBH.Controllers
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
                 return View();
             }
-
             var user = await _context.Users
                 .Include(x => x.Role)
                 .FirstOrDefaultAsync(x => x.Email == email);
-
             if (user == null)
             {
                 ViewBag.Error = "Email không tồn tại";
                 return View();
             }
-
             if (user.IsEmailConfirmed == false)
             {
                 ViewBag.Error = "Tài khoản chưa được xác thực email. Vui lòng kiểm tra hộp thư!";
                 return View();
             }
-
             var hasher = new PasswordHasher<User>();
             var result = hasher.VerifyHashedPassword(user, user.PasswordHash, password);
-
             if (result == PasswordVerificationResult.Failed)
             {
                 ViewBag.Error = "Sai mật khẩu";
                 return View();
             }
-
             // KIỂM TRA TÀI KHOẢN BỊ KHÓA & TỰ ĐỘNG UNBAN
             if (user.IsBanned)
             {
@@ -87,12 +79,18 @@ namespace WebBH.Controllers
                 }
                 else
                 {
-                    // Đang bị phạt -> Chuyển hướng báo lỗi KÈM THỜI GIAN
+                    // 1. Tự động lấy độ lệch múi giờ của Server
+                    TimeSpan serverOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+                    string offsetString = "UTC" + (serverOffset.TotalHours >= 0 ? "+" : "") + serverOffset.Hours;
+                    // 2. Đang bị phạt -> Chuyển hướng báo lỗi KÈM THỜI GIAN và MÚI GIỜ
                     return RedirectToAction("AccountRestricted", "Account", new
                     {
                         reason = user.BanReason,
-                        until = user.BannedUntil?.ToString("dd/MM/yyyy HH:mm"),
-                        untilIso = user.BannedUntil?.ToString("yyyy-MM-ddTHH:mm:ss") // Thêm dòng này cho JS
+                        // Hiển thị ra View: "25/12/2026 15:30 (UTC+1)"
+                        until = user.BannedUntil?.ToString("dd/MM/yyyy HH:mm") + " (" + offsetString + ")",
+                        // Định dạng zzz sẽ tự động nối múi giờ vào đuôi (VD: 2026-12-25T15:30:00+01:00)
+                        // Nhờ có +01:00, JS ở máy Việt Nam sẽ tự dịch ra giờ chuẩn xác để đếm ngược!
+                        untilIso = user.BannedUntil?.ToString("yyyy-MM-ddTHH:mm:sszzz")
                     });
                 }
             }
