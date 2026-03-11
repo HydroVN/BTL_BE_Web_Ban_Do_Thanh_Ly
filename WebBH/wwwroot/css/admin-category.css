@@ -1,0 +1,21 @@
+﻿/* Tùy chỉnh tiêu đề bảng */
+.category-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Hiệu ứng mượt mà khi di chuột vào từng dòng */
+.category-row {
+    transition: background-color 0.2s ease-in-out;
+}
+
+    .category-row:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+/* Thêm bóng đổ cho Modal nhìn nổi bật hơn so với nền tối */
+.category-modal-custom {
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+}
